@@ -1,0 +1,992 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Margalla Riders: find bikers in Islamabad and Rawalpindi who are free on your dates, browse northern routes and plan group tours.">
+<meta property="og:title" content="Margalla Riders">
+<meta property="og:description" content="Find ride partners in Islamabad, browse routes from Murree to Khunjerab, and plan group bike tours.">
+<meta name="theme-color" content="#0B0D0E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23FF6B1A'/%3E%3Ccircle cx='9' cy='21' r='5' fill='none' stroke='%23170800' stroke-width='2.5'/%3E%3Ccircle cx='23' cy='21' r='5' fill='none' stroke='%23170800' stroke-width='2.5'/%3E%3Cpath d='M9 21l5-9h6l3 9' fill='none' stroke='%23170800' stroke-width='2.5' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body><title>Margalla Riders</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@600;700;800&family=Saira:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: night-ride instrument look. Sticky top bar (bottom tab bar on phones), hero with a winding road and a gauge cluster, cards like spec sheets on asphalt. Deliberately single dark theme. */
+:root{
+  --bg:#0B0D0E; --surface:#15181A; --sunk:#1C2023; --raise:#23282C; --ink:#ECEFF1; --muted:#8D969C; --line:#2A3035;
+  --sign:#FF6B1A; --sign-ink:#170800; --amber:#F5C518; --amber-soft:#2E2608; --ok:#3DDC97; --danger:#FF5A4E;
+  --display:"Saira Condensed","Arial Narrow",Arial,sans-serif;
+  --body:"Saira",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+  --r:14px; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+.wrap{max-width:1140px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;letter-spacing:.01em;font-weight:800}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+::selection{background:var(--sign);color:var(--sign-ink)}
+
+/* top bar + tabs */
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.topbar .wrap{display:flex;align-items:center;gap:16px;padding-block:10px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;font-size:20px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.brand .logo{width:34px;height:34px;border-radius:10px;background:var(--sign);color:var(--sign-ink);display:grid;place-items:center}
+.brand .logo svg{width:22px;height:22px}
+.brand small{display:block;font-family:var(--body);font-size:10.5px;letter-spacing:.18em;color:var(--muted);font-weight:600;line-height:1}
+.tabs{display:flex;gap:4px;margin-left:auto}
+.tabs button{display:flex;align-items:center;gap:7px;background:none;border:0;color:var(--muted);padding:8px 14px;border-radius:99px;cursor:pointer;font-weight:600;font-size:14px;white-space:nowrap}
+.tabs button svg{width:18px;height:18px;flex:none}
+.tabs button:hover{color:var(--ink);background:var(--sunk)}
+.tabs button[aria-selected="true"]{background:var(--sign);color:var(--sign-ink)}
+@media (max-width:760px){
+  .tabs{position:fixed;left:0;right:0;bottom:0;z-index:25;margin:0;justify-content:space-around;background:color-mix(in srgb,var(--surface) 94%,transparent);backdrop-filter:blur(10px);border-top:1px solid var(--line);
+    padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
+  .tabs button{flex-direction:column;gap:2px;font-size:11px;padding:6px 4px;flex:1;border-radius:12px}
+  .tabs button svg{width:22px;height:22px}
+  .tabs button[aria-selected="true"]{background:none;color:var(--sign)}
+  main .wrap{padding-bottom:110px!important}
+  .toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))!important}
+  .savebar{bottom:calc(64px + env(safe-area-inset-bottom,0px))!important}
+}
+
+/* hero */
+.hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line);
+  background:radial-gradient(120% 90% at 85% 10%,color-mix(in srgb,var(--sign) 22%,transparent),transparent 60%),var(--bg)}
+.hero .wrap{position:relative;z-index:1;padding-block:34px 30px;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:28px;align-items:end}
+@media (max-width:860px){.hero .wrap{grid-template-columns:1fr;padding-block:24px}}
+.kicker{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber)}
+.kicker::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 4px color-mix(in srgb,var(--ok) 25%,transparent)}
+.hero h1{font-size:clamp(38px,6.4vw,68px);line-height:.95;margin-top:12px;text-transform:uppercase;letter-spacing:-.005em}
+.hero h1 em{font-style:normal;color:var(--sign)}
+.hero p{margin:12px 0 0;max-width:52ch;color:var(--muted);font-size:16px}
+.hero .cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.hero{min-height:clamp(460px,52vw,640px);display:flex;flex-direction:column;justify-content:flex-end;background:#0B1220}
+.hero .wrap{width:100%}
+#scene{position:absolute;inset:0;width:100%;height:100%;display:block}
+.scrim{position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(6,8,10,.88) 0%,rgba(6,8,10,.55) 42%,rgba(6,8,10,0) 70%),linear-gradient(0deg,rgba(11,13,14,.95) 0%,rgba(11,13,14,0) 38%)}
+@media (max-width:860px){
+  .hero{min-height:0;background:var(--bg)}
+  #scene{position:relative;height:clamp(230px,62vw,340px)}
+  .scrim{inset:auto 0 auto 0;top:calc(clamp(230px,62vw,340px) - 70px);height:72px;background:linear-gradient(180deg,rgba(11,13,14,0),var(--bg))}
+  .hero .wrap{margin-top:-24px}
+}
+.hero h1,.hero p,.kicker{text-shadow:0 2px 18px rgba(0,0,0,.6)}
+.hero p{color:#C9D1D6}
+.vbar{position:absolute;z-index:2;top:14px;right:max(16px,env(safe-area-inset-right,0px));display:flex;gap:8px;align-items:center}
+.vcap{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);padding:6px 10px;border-radius:99px;color:#E9EEF1}
+.vcap i{width:8px;height:8px;border-radius:50%;background:var(--danger);box-shadow:0 0 0 3px rgba(255,90,78,.25)}
+.vctl{width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:rgba(0,0,0,.55);color:#fff;display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(6px)}
+.vctl svg{width:16px;height:16px}
+@media (max-width:520px){.vcap{display:none}}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:480px){.stats{grid-template-columns:1fr 1fr}.stats .gauge{grid-column:1/-1}}
+.tile{background:color-mix(in srgb,var(--surface) 85%,transparent);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.g-l{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.gauge{flex-direction:row;align-items:center;gap:12px}
+.ring{--p:0;flex:none;width:72px;height:72px;border-radius:50%;background:conic-gradient(from 225deg,var(--sign) calc(var(--p)*.75%),var(--raise) 0 75%,transparent 0);display:grid;place-items:center;position:relative}
+.ring::before{content:"";position:absolute;inset:7px;border-radius:50%;background:var(--surface)}
+.ring b{position:relative;font-family:var(--mono);font-size:22px;line-height:1}
+.ring span{position:absolute;bottom:4px;font-family:var(--mono);font-size:9.5px;color:var(--muted)}
+.odo{display:flex;gap:3px}
+.odo i{font-style:normal;font-family:var(--mono);font-weight:700;font-size:24px;line-height:1;background:#000;color:var(--ink);border:1px solid var(--line);border-radius:5px;padding:6px 5px;box-shadow:inset 0 -10px 12px -8px rgba(255,255,255,.08)}
+.odo i:last-child{color:var(--sign)}
+
+main .wrap{padding-block:22px 60px}
+.banner{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--amber-soft);border:1px solid color-mix(in srgb,var(--amber) 45%,transparent);padding:10px 14px;border-radius:12px;margin-bottom:16px;font-size:14px}
+.banner b{font-weight:600;color:var(--amber)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.spacer{flex:1}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--sunk);padding:9px 16px;border-radius:99px;cursor:pointer;font-weight:600;font-size:14px;white-space:nowrap}
+.btn:hover{border-color:var(--muted)}
+.btn.primary,.btn.amber{background:var(--sign);color:var(--sign-ink);border-color:var(--sign);font-weight:700}
+.btn.primary:hover,.btn.amber:hover{filter:brightness(1.08)}
+.btn.ghost{background:none}
+.btn.danger{color:var(--danger)}
+.btn:disabled{opacity:.45;cursor:not-allowed;filter:none}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field label,.lbl{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+input[type=text],input[type=tel],input[type=number],input[type=date],select,textarea{background:var(--sunk);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;min-width:0}
+input:focus,select:focus,textarea:focus{border-color:var(--sign);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--sign) 25%,transparent)}
+textarea{resize:vertical;min-height:80px}
+.badge{font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.badge.ok{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 60%,transparent);background:color-mix(in srgb,var(--ok) 10%,transparent)}
+.private{display:flex;gap:10px;align-items:flex-start;background:var(--sunk);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13.5px}
+.private svg{flex:none;width:18px;height:18px;margin-top:1px;color:var(--amber)}
+.req{color:var(--danger)}
+.legal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.ticks{display:grid;gap:8px}
+.ticks label{display:flex;gap:10px;align-items:flex-start;font-size:14px;cursor:pointer}
+.ticks input{margin-top:4px;flex:none;accent-color:var(--sign)}
+.adm{border-top:1px solid var(--line);padding-top:12px}
+.filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:10px;align-items:end;margin-bottom:18px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px}
+@media (max-width:760px){.filters{grid-template-columns:1fr 1fr}.filters .field:first-child{grid-column:1/-1}}
+.check{display:flex;align-items:center;gap:8px;font-size:14px;padding:9px 0;white-space:nowrap;cursor:pointer}
+.check input{accent-color:var(--sign)}
+
+/* rider cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);display:flex;flex-direction:column;gap:12px;min-width:0;overflow:hidden;padding:0 16px 16px}
+.card.matched{border-color:color-mix(in srgb,var(--sign) 55%,var(--line))}
+.cover{margin:0 -16px;height:64px;position:relative;display:flex;justify-content:space-between;align-items:flex-start;padding:10px 12px;
+  background:repeating-linear-gradient(115deg,transparent 0 10px,rgba(255,255,255,.025) 10px 20px),linear-gradient(135deg,var(--raise),var(--sunk))}
+.card.matched .cover{background:repeating-linear-gradient(115deg,transparent 0 10px,rgba(0,0,0,.06) 10px 20px),linear-gradient(135deg,color-mix(in srgb,var(--sign) 55%,var(--raise)),var(--raise))}
+.cover .type{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;background:rgba(0,0,0,.45);padding:3px 8px;border-radius:99px}
+.match-pill{font-size:11.5px;font-weight:700;background:var(--ink);color:var(--bg);padding:3px 9px;border-radius:99px}
+.who{display:flex;gap:12px;align-items:flex-end;min-width:0}
+.card .who{margin-top:-34px;position:relative}
+.av{flex:none;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:19px;color:#fff;overflow:hidden}
+.av img{width:100%;height:100%;object-fit:cover;display:block}
+.card .who .av{width:68px;height:68px;font-size:26px;border:3px solid var(--surface);box-shadow:0 0 0 2px var(--line)}
+.card.matched .who .av{box-shadow:0 0 0 2px var(--sign)}
+.photo-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.photo-row .av{width:88px;height:88px;font-size:32px;box-shadow:0 0 0 2px var(--sign);border:3px solid var(--surface)}
+.dlg .who .av{width:64px;height:64px;font-size:24px}
+.who h3{font-size:22px;line-height:1.05;overflow-wrap:anywhere}
+.who small{color:var(--muted);font-size:13px}
+.plate{display:flex;align-items:stretch;gap:12px;background:var(--sunk);border-radius:10px;padding:10px 12px;font-size:14px}
+.plate .cc{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;font-family:var(--mono);font-weight:700;font-size:22px;line-height:1;color:var(--sign);padding-right:12px;border-right:1px dashed var(--line);white-space:nowrap}
+.plate .cc::after{content:"CC";font-size:9.5px;letter-spacing:.14em;color:var(--muted);margin-top:3px}
+.plate .bk{min-width:0;display:flex;flex-direction:column;justify-content:center}
+.plate .bk b{display:block;font-weight:600;overflow-wrap:anywhere}
+.plate .bk span{color:var(--muted);font-size:12.5px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:12.5px;padding:3px 10px;border-radius:99px;background:var(--sunk);color:var(--ink);white-space:nowrap;border:1px solid transparent}
+.chip.date{font-family:var(--mono);font-size:11.5px}
+.chip.shared{background:color-mix(in srgb,var(--sign) 18%,transparent);border-color:var(--sign);color:var(--ink)}
+.chip.pick{cursor:pointer;border:1px solid var(--line);background:var(--sunk)}
+.chip.pick[aria-pressed="true"]{background:var(--sign);color:var(--sign-ink);border-color:var(--sign);font-weight:600}
+.match{font-size:12px;font-weight:600;color:var(--ok);display:flex;align-items:center;gap:6px}
+.match::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--ok)}
+.card .actions{display:flex;gap:8px;margin-top:auto}
+.card .actions .btn{flex:1}
+.sample-tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);border:1px solid var(--amber);border-radius:4px;padding:1px 5px;margin-left:6px;vertical-align:middle}
+
+/* routes */
+.rcard{padding-top:0}
+.rhead{display:block;margin:0 -16px;padding:14px 0 0;background:linear-gradient(180deg,var(--sunk),transparent);border:0;cursor:pointer;position:relative;width:calc(100% + 32px)}
+.rhead .elev{display:block;width:100%;height:76px}
+.rdays{position:absolute;top:10px;left:12px;font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;background:rgba(0,0,0,.5);padding:3px 8px;border-radius:99px}
+.mini-elev{margin:0 0 8px;width:100%;padding:6px 0 0;border-radius:10px;overflow:hidden}
+.mini-elev .elev{height:56px}
+.ride-rt{margin:0 0 12px}
+.elev-wrap{background:var(--sunk);border-radius:12px;padding:8px 6px 2px}
+.elev-wrap .elev{display:block;width:100%;height:auto}
+.rstats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.rstats div{background:var(--sunk);border-radius:10px;padding:8px 10px;min-width:0}
+.rstats b{display:block;font-family:var(--mono);font-size:16px;line-height:1.2;white-space:nowrap}
+.rstats span{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+@media (max-width:420px){.rstats{grid-template-columns:1fr 1fr}}
+.diff{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 9px;border-radius:99px;border:1px solid}
+.d-easy{color:var(--ok);border-color:var(--ok)}
+.d-moderate{color:var(--amber);border-color:var(--amber)}
+.d-hard{color:var(--danger);border-color:var(--danger)}
+.surf{display:flex;height:8px;border-radius:99px;overflow:hidden;gap:2px}
+.surf i{display:block}
+.s-paved{background:#8A959C}.s-broken{background:var(--amber)}.s-gravel{background:#B5835A}.s-dirt{background:var(--sign)}
+.stages,.stops{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.stages li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;background:var(--sunk);border-radius:10px;padding:8px 12px}
+.stages b{font-family:var(--display);color:var(--sign);font-size:16px}
+.stages em,.stops em{font-style:normal;font-family:var(--mono);font-size:11.5px;color:var(--muted);white-space:nowrap}
+.stops li{display:flex;justify-content:space-between;gap:10px;padding:0 0 6px 18px;border-bottom:1px dashed var(--line);position:relative}
+.stops li::before{content:"";position:absolute;left:2px;top:7px;width:8px;height:8px;border-radius:50%;border:2px solid var(--sign)}
+.stops li:last-child::before{background:var(--sign)}
+.hls{display:grid;gap:8px}
+.hl{display:flex;gap:10px;align-items:flex-start;background:var(--sunk);border-radius:10px;padding:10px 12px;border-left:3px solid var(--muted)}
+.hl p{margin:2px 0;font-size:14px}
+.hl-t{flex:none;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);width:72px;padding-top:2px}
+.hl-fuel{border-left-color:var(--amber)}.hl-food{border-left-color:#B5835A}.hl-view{border-left-color:var(--ok)}.hl-mechanic{border-left-color:#8A959C}.hl-stay{border-left-color:#7C9CFF}.hl-check{border-left-color:var(--ink)}
+.hl-hazard{border-left-color:var(--danger)}.hl-hazard .hl-t{color:var(--danger)}
+.hl-a{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.vote{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:3px 9px;font-family:var(--mono);font-size:12px;cursor:pointer}
+.vote[aria-pressed="true"]{background:var(--sign);color:var(--sign-ink);border-color:var(--sign)}
+.hlf{display:grid;grid-template-columns:auto 1fr;gap:8px;margin-top:10px}
+.hlf #h-note{grid-column:1/-1}.hlf .btn{grid-column:1/-1;justify-self:start}
+/* empty */
+.empty{border:1.5px dashed var(--line);border-radius:var(--r);padding:38px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;color:var(--muted);
+  background:repeating-linear-gradient(90deg,transparent 0 46px,color-mix(in srgb,var(--amber) 10%,transparent) 46px 70px) center 100%/100% 3px no-repeat,var(--surface)}
+.empty h3{color:var(--ink);font-size:26px;text-transform:uppercase}
+.empty p{margin:0;max-width:48ch}
+
+/* calendar */
+.cal-layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:860px){.cal-layout{grid-template-columns:1fr}}
+.cal{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.cal-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.cal-head h2{font-size:26px;flex:1;text-transform:uppercase}
+.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.dow{font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-align:center;padding:4px 0}
+.day{aspect-ratio:1/1;max-width:100%;border:1px solid transparent;border-radius:10px;background:var(--sunk);display:flex;flex-direction:column;justify-content:space-between;padding:5px 6px;cursor:pointer;text-align:left;font-variant-numeric:tabular-nums;position:relative;min-width:0}
+.day:hover:not(:disabled){border-color:var(--muted)}
+.day .n{font-weight:600;font-size:14px;font-family:var(--mono)}
+.day .c{font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden}
+.day.has{background:color-mix(in srgb,var(--sign) calc(var(--heat) * 1%),var(--sunk))}
+.day.hot .n,.day.hot .c{color:var(--sign-ink)}
+.day.mine::after{content:"";position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--amber);box-shadow:0 0 0 2px var(--bg)}
+.day.sel{border-color:var(--amber);box-shadow:0 0 0 1px var(--amber)}
+.day.past,.day.out{opacity:.3;cursor:default}
+.day.today .n{text-decoration:underline;text-decoration-color:var(--amber);text-underline-offset:3px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;font-size:12.5px;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.side h2{font-size:30px;text-transform:uppercase}
+.side .sub{color:var(--muted);margin:2px 0 12px}
+.mini{display:flex;flex-direction:column;gap:8px}
+.mini-item{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:9px 11px;cursor:pointer;text-align:left;width:100%}
+.mini-item:hover{border-color:var(--sign)}
+.mini-item .av{width:38px;height:38px;font-size:15px}
+.mini-item div{min-width:0;flex:1}
+.mini-item b{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mini-item span{font-size:12.5px;color:var(--muted)}
+
+/* rides */
+.ride{display:grid;grid-template-columns:auto minmax(0,1fr);gap:18px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;position:relative;overflow:hidden}
+.ride::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--sign)}
+.dateblock{width:76px;text-align:center;border-radius:12px;overflow:hidden;background:var(--sunk);align-self:start}
+.dateblock .m{background:var(--sign);color:var(--sign-ink);font-family:var(--display);font-weight:800;font-size:14px;letter-spacing:.14em;padding:3px 0}
+.dateblock .d{font-family:var(--display);font-weight:800;font-size:36px;line-height:1.1}
+.dateblock .w{font-size:11.5px;color:var(--muted);padding-bottom:6px;text-transform:uppercase;letter-spacing:.1em}
+.ride h3{font-size:26px;text-transform:uppercase;line-height:1.05}
+.ride .meta{color:var(--muted);font-size:14px;display:flex;flex-wrap:wrap;gap:4px 14px;margin:4px 0 10px}
+.ride p{margin:0 0 10px}
+.route{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;background:var(--sunk);border-radius:10px;padding:10px 12px;margin:0 0 12px}
+.route .pin{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;display:flex;align-items:center;gap:6px;white-space:nowrap;min-width:0}
+.route .pin::before{content:"";width:10px;height:10px;border-radius:50%;border:2px solid var(--ink);flex:none}
+.route .pin.end::before{background:var(--sign);border-color:var(--sign)}
+.route .pin.end{overflow:hidden;text-overflow:ellipsis}
+.route .line{position:relative;height:18px;display:flex;align-items:center;justify-content:center}
+.route .line::before{content:"";position:absolute;left:0;right:0;top:50%;border-top:2px dashed var(--amber);opacity:.8}
+.route .line span{position:relative;background:var(--sunk);padding:0 8px;font-family:var(--mono);font-size:11.5px;color:var(--amber);white-space:nowrap}
+.list{display:flex;flex-direction:column;gap:14px}
+.sec-head{display:flex;align-items:end;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.sec-head h2{font-size:32px;flex:1;text-transform:uppercase}
+
+/* profile form */
+.form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
+@media (max-width:860px){.form{grid-template-columns:1fr}}
+fieldset{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);padding:18px;margin:0;display:grid;gap:14px;min-width:0}
+legend{font-family:var(--display);font-weight:800;font-size:20px;padding:0 8px;text-transform:uppercase;letter-spacing:.03em;color:var(--sign)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.three{display:grid;grid-template-columns:1.2fr 1.2fr .8fr;gap:10px}
+@media (max-width:480px){.three{grid-template-columns:1fr 1fr}.three .field:last-child{grid-column:1/-1}}
+.hint{font-size:12.5px;color:var(--muted);margin:0}
+.savebar{position:sticky;bottom:0;display:flex;gap:10px;align-items:center;justify-content:flex-end;padding:12px 0 calc(12px + env(safe-area-inset-bottom,0px));background:linear-gradient(transparent,var(--bg) 35%);grid-column:1/-1;z-index:5}
+
+/* modal */
+dialog{border:1px solid var(--line);border-radius:18px;background:var(--surface);color:var(--ink);padding:0;width:min(560px,calc(100vw - 32px));max-height:calc(100vh - 40px)}
+dialog::backdrop{background:rgba(0,0,0,.7);backdrop-filter:blur(3px)}
+.dlg{padding:22px;display:flex;flex-direction:column;gap:14px}
+.dlg h2{font-size:30px;text-transform:uppercase;line-height:1}
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:7px 14px;font-size:14px}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;overflow-wrap:anywhere}
+.phone{font-family:var(--mono);user-select:all}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:99px;font-weight:600;z-index:50;max-width:calc(100vw - 32px)}
+@media (prefers-reduced-motion:no-preference){
+  .card,.ride,.mini-item{transition:border-color .15s,transform .15s}.card:hover{transform:translateY(-2px);border-color:var(--muted)}
+  .road .dash{animation:drive 2.4s linear infinite}
+  @keyframes drive{to{stroke-dashoffset:-48}}
+}
+</style>
+
+<header class="topbar"><div class="wrap">
+  <div class="brand"><span class="logo"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="8" cy="22" r="5.5" fill="none" stroke="currentColor" stroke-width="2.6"/><circle cx="24" cy="22" r="5.5" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M8 22 L14 12 L21 12 L24 22 M14 12 L12 8 M19 12 L17 17 L8 22" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/></svg></span><span>Margalla Riders<small>Islamabad · Rawalpindi</small></span></div>
+  <nav class="tabs" role="tablist" id="tabs">
+    <button role="tab" data-tab="riders" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 16a9 9 0 0 1 18 0v3H3z"/><path d="M12 7v5h9"/></svg><span>Riders</span></button>
+    <button role="tab" data-tab="routes" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M2 20 9 8l4 6 3-4 6 10z"/><path d="m7.5 10.5 1.5 1 1.5-1"/></svg><span>Routes</span></button>
+    <button role="tab" data-tab="calendar" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span>Availability</span></button>
+    <button role="tab" data-tab="rides" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h7a3.5 3.5 0 0 0 0-7H9a3.5 3.5 0 0 1 0-7h7"/></svg><span>Group rides</span></button>
+    <button role="tab" data-tab="profile" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>My profile</span></button>
+  </nav>
+</div></header>
+
+<section class="hero" id="hero">
+  <canvas id="scene" aria-hidden="true"></canvas>
+  <div class="scrim" aria-hidden="true"></div>
+  <div class="vbar"><span class="vcap"><i></i>Karakoram Highway · riding a Yamaha YBR 125</span>
+    <button class="vctl" id="vctl" type="button" aria-label="Pause the ride video" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path id="vico" d="M7 5h4v14H7zM13 5h4v14h-4z" fill="currentColor"/></svg></button></div>
+  <div class="wrap">
+    <div>
+      <span class="kicker">Ride partners near you</span>
+      <h1>Find riders who are <em>free</em> when you are.</h1>
+      <p>Post your bike and your free dates. See who in Islamabad and Rawalpindi can ride the same days, then plan the tour together.</p>
+      <div class="cta"><button class="btn primary" data-act="tab" data-tab="profile">Set up my rider profile</button><button class="btn" data-act="tab" data-tab="routes">Browse routes</button><button class="btn ghost" data-act="tab" data-tab="calendar">See who's free</button></div>
+    </div>
+    <div class="stats" id="stats"></div>
+  </div>
+</section>
+
+<main><div class="wrap">
+  <div id="notice"></div>
+  <section id="view"></section>
+</div></main>
+
+<dialog id="dlg"><div id="dlgBody"></div></dialog>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* Hero "ride video": a looping canvas scene of a rider on a YBR 125 along a northern mountain road */
+(function(){
+  const cv=document.getElementById("scene");if(!cv||!cv.getContext)return;const ctx=cv.getContext("2d");
+  const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let W=0,H=0,off=0,t=0,playing=!reduce,visible=true,last=0,raf=0;const dust=[];
+  const hash=n=>{const s=Math.sin(n*127.1+311.7)*43758.5453;return s-Math.floor(s)};
+  const noise=x=>{const i=Math.floor(x),f=x-i,u=f*f*(3-2*f);return hash(i)*(1-u)+hash(i+1)*u};
+  const fbm=(x,o)=>{let v=0,a=1,s=0,f=1;for(let k=0;k<o;k++){v+=noise(x*f+k*17)*a;s+=a;a*=.5;f*=2.05}return v/s};
+  function size(){const d=Math.min(2,window.devicePixelRatio||1);W=cv.clientWidth;H=cv.clientHeight;if(!W||!H)return;cv.width=Math.round(W*d);cv.height=Math.round(H*d);ctx.setTransform(d,0,0,d,0,0);draw()}
+  function range(o,base,amp,scale,col,snow,step){
+    const pts=[];for(let x=-step;x<=W+step;x+=step){const v=fbm((x+o)/scale,5);pts.push([x,base-Math.pow(v,1.6)*amp*1.5])}
+    ctx.beginPath();ctx.moveTo(-step,H);pts.forEach(p=>ctx.lineTo(p[0],p[1]));ctx.lineTo(W+step,H);ctx.closePath();ctx.fillStyle=col;ctx.fill();
+    if(snow){ctx.save();ctx.clip();const g=ctx.createLinearGradient(0,base-amp*1.2,0,base-amp*.2);g.addColorStop(0,"rgba(245,248,252,.95)");g.addColorStop(1,"rgba(200,214,230,.35)");ctx.fillStyle=g;
+      ctx.beginPath();ctx.moveTo(-step,0);for(let x=-step;x<=W+step;x+=step){ctx.lineTo(x,base-amp*snow+(noise((x+o)/22)-.5)*26)}ctx.lineTo(W+step,0);ctx.closePath();ctx.fill();
+      // light side shading
+      ctx.fillStyle="rgba(10,20,40,.18)";for(let i=1;i<pts.length;i++){if(pts[i][1]>pts[i-1][1]){ctx.beginPath();ctx.moveTo(pts[i-1][0],pts[i-1][1]);ctx.lineTo(pts[i][0],pts[i][1]);ctx.lineTo(pts[i][0],H);ctx.lineTo(pts[i-1][0],H);ctx.fill()}}
+      ctx.restore()}}
+  function sky(){const g=ctx.createLinearGradient(0,0,0,H*.75);g.addColorStop(0,"#0E1830");g.addColorStop(.45,"#3B4F78");g.addColorStop(.8,"#E58A55");g.addColorStop(1,"#F4B26B");ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    const sx=W*.78,sy=H*.36,r=Math.max(26,H*.07);const sg=ctx.createRadialGradient(sx,sy,0,sx,sy,r*5);sg.addColorStop(0,"rgba(255,214,150,.9)");sg.addColorStop(.2,"rgba(255,170,100,.35)");sg.addColorStop(1,"rgba(255,140,80,0)");
+    ctx.fillStyle=sg;ctx.fillRect(0,0,W,H);ctx.fillStyle="#FFE2B0";ctx.beginPath();ctx.arc(sx,sy,r,0,7);ctx.fill();
+    ctx.fillStyle="rgba(255,236,220,.18)";for(let i=0;i<5;i++){const cx=((i*W*.31-off*.02)%(W+400)+W+400)%(W+400)-200,cy=H*(.12+.07*(i%3));ctx.beginPath();ctx.ellipse(cx,cy,120+i*20,14+i*2,0,0,7);ctx.fill()}}
+  function road(){const ry=H*.83;ctx.fillStyle="#2A2F2A";ctx.fillRect(0,ry-6,W,8);ctx.fillStyle="#17191B";ctx.fillRect(0,ry,W,H-ry);
+    ctx.fillStyle="#F5C518";ctx.fillRect(0,ry+2,W,2);
+    const dash=46,gap=34,per=dash+gap,ly=ry+(H-ry)*.45;ctx.fillStyle="rgba(240,240,240,.85)";for(let x=-(off%per);x<W;x+=per)ctx.fillRect(x,ly,dash,3);
+    // KKH kilometre stones and guard posts
+    const sp=520;for(let x=-(off%sp);x<W+60;x+=sp){const n=Math.floor((x+off)/sp);const bx=x+20,by=ry-4;ctx.fillStyle="#E9E4D8";ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(bx,by-26);ctx.quadraticCurveTo(bx+11,by-36,bx+22,by-26);ctx.lineTo(bx+22,by);ctx.fill();
+      ctx.fillStyle="#F5C518";ctx.fillRect(bx,by-30,22,8);ctx.fillStyle="#222";ctx.font="bold 7px monospace";ctx.textAlign="center";ctx.fillText("KKH",bx+11,by-14);ctx.fillText(String(400+(n%300)),bx+11,by-6)}
+    const gp=90;ctx.fillStyle="#C9CFD2";for(let x=-(off%gp);x<W;x+=gp){ctx.fillRect(x,ry-14,3,12)}ctx.fillRect(0,ry-12,W,2)}
+  function bike(){const s=Math.max(.75,Math.min(1.6,H/430));const ry=H*.83;const bx=W>860?W*.66:W*.6;const bob=Math.sin(t*13)*.8*s;const wr=21*s;
+    const rx=bx-37*s,fx=bx+40*s,wy=ry+(H-ry)*.42-wr*.1;const by=wy+bob;
+    // shadow
+    ctx.fillStyle="rgba(0,0,0,.45)";ctx.beginPath();ctx.ellipse(bx,wy+wr+2,62*s,6*s,0,0,7);ctx.fill();
+    // dust
+    if(playing&&Math.random()<.6)dust.push({x:rx-wr*.6,y:wy+wr*.7,vx:-(60+Math.random()*80),vy:-(10+Math.random()*25),r:2+Math.random()*4,a:.5});
+    for(let i=dust.length-1;i>=0;i--){const p=dust[i];ctx.fillStyle=`rgba(200,170,130,${p.a})`;ctx.beginPath();ctx.arc(p.x,p.y,p.r*s,0,7);ctx.fill()}
+    const wheel=(cx)=>{ctx.lineWidth=6*s;ctx.strokeStyle="#0D0D0D";ctx.beginPath();ctx.arc(cx,wy,wr,0,7);ctx.stroke();ctx.lineWidth=1.6*s;ctx.strokeStyle="#9AA3A8";ctx.beginPath();ctx.arc(cx,wy,wr*.72,0,7);ctx.stroke();
+      const ang=off/(wr);ctx.lineWidth=1*s;ctx.strokeStyle="#C4CBCF";for(let k=0;k<12;k++){const a=ang+k*Math.PI/6;ctx.beginPath();ctx.moveTo(cx,wy);ctx.lineTo(cx+Math.cos(a)*wr*.7,wy+Math.sin(a)*wr*.7);ctx.stroke()}
+      ctx.fillStyle="#555";ctx.beginPath();ctx.arc(cx,wy,3*s,0,7);ctx.fill()};
+    wheel(rx);wheel(fx);
+    ctx.save();ctx.translate(0,bob);ctx.lineCap="round";ctx.lineJoin="round";
+    // swingarm, fork
+    ctx.strokeStyle="#1A1A1A";ctx.lineWidth=4*s;ctx.beginPath();ctx.moveTo(rx,wy);ctx.lineTo(bx-6*s,wy-12*s);ctx.stroke();
+    ctx.strokeStyle="#B8C0C4";ctx.lineWidth=3.5*s;ctx.beginPath();ctx.moveTo(fx,wy);ctx.lineTo(bx+28*s,wy-44*s);ctx.stroke();
+    // engine
+    ctx.fillStyle="#5E676C";ctx.beginPath();ctx.roundRect?ctx.roundRect(bx-14*s,wy-26*s,26*s,20*s,4*s):ctx.rect(bx-14*s,wy-26*s,26*s,20*s);ctx.fill();
+    ctx.strokeStyle="#7F898E";ctx.lineWidth=1*s;for(let k=0;k<4;k++){ctx.beginPath();ctx.moveTo(bx-12*s,wy-23*s+k*4*s);ctx.lineTo(bx+10*s,wy-23*s+k*4*s);ctx.stroke()}
+    // exhaust
+    ctx.strokeStyle="#D7DDE0";ctx.lineWidth=4*s;ctx.beginPath();ctx.moveTo(bx+6*s,wy-8*s);ctx.lineTo(bx-10*s,wy-2*s);ctx.lineTo(rx-6*s,wy-10*s);ctx.stroke();
+    // frame + tank (red/black YBR style) + side panel + seat
+    ctx.strokeStyle="#111";ctx.lineWidth=3.5*s;ctx.beginPath();ctx.moveTo(bx+26*s,wy-42*s);ctx.lineTo(bx-4*s,wy-34*s);ctx.lineTo(rx+6*s,wy-34*s);ctx.stroke();
+    ctx.fillStyle="#C8102E";ctx.beginPath();ctx.moveTo(bx-6*s,wy-34*s);ctx.quadraticCurveTo(bx+4*s,wy-50*s,bx+24*s,wy-44*s);ctx.lineTo(bx+20*s,wy-34*s);ctx.closePath();ctx.fill();
+    ctx.fillStyle="#fff";ctx.fillRect(bx+2*s,wy-42*s,12*s,2*s);
+    ctx.fillStyle="#1B1B1B";ctx.beginPath();ctx.moveTo(rx+2*s,wy-36*s);ctx.quadraticCurveTo(bx-20*s,wy-44*s,bx-4*s,wy-38*s);ctx.lineTo(bx-6*s,wy-33*s);ctx.lineTo(rx+2*s,wy-32*s);ctx.fill();
+    ctx.fillStyle="#C8102E";ctx.beginPath();ctx.moveTo(rx-2*s,wy-34*s);ctx.lineTo(rx+14*s,wy-35*s);ctx.lineTo(rx+12*s,wy-29*s);ctx.lineTo(rx-1*s,wy-30*s);ctx.fill();
+    // headlight, handlebar
+    ctx.fillStyle="#E8E2C8";ctx.beginPath();ctx.arc(bx+33*s,wy-42*s,5*s,0,7);ctx.fill();ctx.fillStyle="rgba(255,240,190,.25)";ctx.beginPath();ctx.moveTo(bx+37*s,wy-44*s);ctx.lineTo(bx+130*s,wy-60*s);ctx.lineTo(bx+130*s,wy-14*s);ctx.closePath();ctx.fill();
+    ctx.strokeStyle="#222";ctx.lineWidth=2.5*s;ctx.beginPath();ctx.moveTo(bx+24*s,wy-48*s);ctx.lineTo(bx+20*s,wy-54*s);ctx.stroke();
+    // rider: leg, torso, arm, helmet
+    const lean=Math.sin(t*2)*1.2*s;
+    ctx.strokeStyle="#1F2A44";ctx.lineWidth=7*s;ctx.beginPath();ctx.moveTo(bx-14*s,wy-40*s);ctx.lineTo(bx+2*s,wy-28*s);ctx.lineTo(bx-2*s,wy-12*s);ctx.stroke();
+    ctx.fillStyle="#111";ctx.fillRect(bx-6*s,wy-14*s,10*s,5*s);
+    ctx.strokeStyle="#FF6B1A";ctx.lineWidth=11*s;ctx.beginPath();ctx.moveTo(bx-15*s,wy-44*s);ctx.lineTo(bx-2*s+lean,wy-68*s);ctx.stroke();
+    ctx.strokeStyle="#E05A12";ctx.lineWidth=5*s;ctx.beginPath();ctx.moveTo(bx-2*s+lean,wy-64*s);ctx.lineTo(bx+12*s,wy-56*s);ctx.lineTo(bx+20*s,wy-54*s);ctx.stroke();
+    ctx.fillStyle="#141414";ctx.beginPath();ctx.arc(bx+2*s+lean,wy-76*s,8.5*s,0,7);ctx.fill();
+    ctx.fillStyle="#3A6EA5";ctx.beginPath();ctx.moveTo(bx+4*s+lean,wy-79*s);ctx.lineTo(bx+11*s+lean,wy-77*s);ctx.lineTo(bx+9*s+lean,wy-72*s);ctx.lineTo(bx+3*s+lean,wy-73*s);ctx.fill();
+    // backpack scarf flutter
+    ctx.strokeStyle="#F5C518";ctx.lineWidth=2.5*s;ctx.beginPath();ctx.moveTo(bx-4*s+lean,wy-70*s);ctx.quadraticCurveTo(bx-18*s,wy-72*s+Math.sin(t*18)*3*s,bx-30*s,wy-68*s+Math.sin(t*14)*4*s);ctx.stroke();
+    ctx.restore()}
+  function draw(){if(!W)return;sky();
+    range(off*.04,H*.62,H*.44,230,"#5A6A86",.62,6);
+    range(off*.12+900,H*.7,H*.3,160,"#33405A",.82,6);
+    range(off*.35+2300,H*.8,H*.13,110,"#1C2430",0,8);
+    // haze
+    const hz=ctx.createLinearGradient(0,H*.55,0,H*.82);hz.addColorStop(0,"rgba(244,178,107,0)");hz.addColorStop(1,"rgba(244,178,107,.12)");ctx.fillStyle=hz;ctx.fillRect(0,H*.55,W,H*.27);
+    road();bike()}
+  function frame(ts){raf=0;const dt=Math.min(.05,(ts-(last||ts))/1000);last=ts;
+    if(playing&&visible){off+=dt*150;t+=dt;for(let i=dust.length-1;i>=0;i--){const p=dust[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.a-=dt*.8;if(p.a<=0)dust.splice(i,1)}draw();raf=requestAnimationFrame(frame)}}
+  function play(){if(!raf&&playing&&visible){last=0;raf=requestAnimationFrame(frame)}}
+  const btn=document.getElementById("vctl"),ico=document.getElementById("vico");
+  function syncBtn(){ico.setAttribute("d",playing?"M7 5h4v14H7zM13 5h4v14h-4z":"M8 5v14l11-7z");btn.setAttribute("aria-label",playing?"Pause the ride video":"Play the ride video");btn.setAttribute("aria-pressed",String(!playing))}
+  btn.addEventListener("click",()=>{playing=!playing;syncBtn();play()});syncBtn();
+  if("IntersectionObserver" in window)new IntersectionObserver(es=>{visible=es[0].isIntersecting&&!document.hidden;play()}).observe(cv);
+  document.addEventListener("visibilitychange",()=>{visible=!document.hidden;play()});
+  if("ResizeObserver" in window)new ResizeObserver(size).observe(cv);else addEventListener("resize",size);
+  off=reduce?2600:0;t=0;size();play();
+})();
+</script>
+
+<script>
+const AREAS=["F-6","F-7","F-8","F-10","F-11","E-7","E-11","G-6","G-9","G-10","G-11","G-13","I-8","I-10","H-13","B-17","DHA Islamabad","Bahria Town","Gulberg Greens","PWD","Soan Garden","Rawalpindi Saddar","Satellite Town","Chaklala Scheme","Other"];
+const TYPES=["Standard","Cruiser","Sports","Adventure","Dirt / Trail","Scooter"];
+const STYLES=["Day trips","Northern areas","Long tours","Off-road","Night rides","Camping","Photography"];
+const DEST=[["Pir Sohawa",25],["Khanpur Dam",50],["Murree",60],["Nathia Gali",85],["Ayubia",90],["Kallar Kahar",120],["Shogran",215],["Keran, Neelum",220],["Naran",240],["Kalam, Swat",300],["Babusar Top",310],["Fairy Meadows (Raikot)",480],["Hunza (Karimabad)",600],["Skardu",630],["Khunjerab Pass",870]];
+const KM=Object.fromEntries(DEST);
+const LIVE_URL="https://claude.ai/artifact/NeTqq8N4HKdzP9E7xG53h3";
+/* Club route library. Distances and altitudes are approximate. wp: [stop, km from start, altitude m] */
+const ROUTES=[
+ {id:"pir-sohawa",name:"Margalla Sunrise Climb",to:"Pir Sohawa",diff:"Easy",days:1,season:"All year",surf:{paved:100},
+  wp:[["Faisal Mosque",0,540],["Daman-e-Koh turn",6,640],["Margalla Road",12,820],["Pir Sohawa",25,1150]],
+  about:"Short twisty climb above the city. Popular at dawn and for evening tea with a view of Islamabad.",notes:"Steep hairpins near the top; watch for sand on corners after rain."},
+ {id:"khanpur",name:"Khanpur Lake Loop",to:"Khanpur Dam",diff:"Easy",days:1,season:"All year (best Mar–May, Sep–Nov)",surf:{paved:95,broken:5},
+  wp:[["Islamabad (G-11)",0,540],["Taxila",35,550],["Khanpur Dam",50,600]],
+  about:"Flat warm-up ride for new riders, ending at the lake for boating and fresh fruit stalls.",notes:"Heavy trucks on the GT Road stretch near Taxila."},
+ {id:"murree",name:"Murree Expressway",to:"Murree",diff:"Easy",days:1,season:"All year (snow Dec–Feb)",surf:{paved:100},
+  wp:[["Islamabad (Zero Point)",0,540],["Bhara Kahu",12,560],["Satra Meel",30,1200],["Company Bagh",42,1700],["Murree Mall Road",60,2290]],
+  about:"Wide climbing expressway from the city to the hills. The classic first hill ride.",notes:"Weekend traffic jams near Murree. In winter, check snow updates before leaving."},
+ {id:"galiyat",name:"Galiyat Ridge Run",to:"Nathia Gali",diff:"Moderate",days:1,season:"Mar–Nov",surf:{paved:90,broken:10},
+  wp:[["Islamabad",0,540],["Murree",60,2290],["Khaira Gali",75,2350],["Dunga Gali",85,2450],["Nathia Gali",90,2500]],
+  about:"Forest ridge road past Ayubia and Dunga Gali. Cool air and pine views all the way.",notes:"Narrow road with blind bends and fog in the afternoons. Ride with lights on."},
+ {id:"kallar-kahar",name:"Salt Range Run",to:"Kallar Kahar",diff:"Easy",days:1,season:"Oct–Mar",surf:{paved:100},
+  wp:[["Islamabad",0,540],["Rawat",25,500],["Mandra",50,480],["Chakwal",100,500],["Kallar Kahar",125,600]],
+  about:"Long straight plains ride to the Salt Range lake and peacock gardens. Good for building distance.",notes:"Motorcycles aren't allowed on the M-2 Motorway, so this route uses the GT Road and Chakwal Road."},
+ {id:"neelum",name:"Neelum Valley Ride",to:"Keran, Neelum",diff:"Moderate",days:2,season:"Apr–Oct",surf:{paved:80,broken:15,gravel:5},
+  wp:[["Islamabad",0,540],["Murree",60,2290],["Kohala Bridge",100,600],["Muzaffarabad",140,740],["Keran",230,1520]],
+  stages:[["Islamabad → Muzaffarabad",140],["Muzaffarabad → Keran",90]],
+  about:"River valley road along the Neelum. Green hills and the Line of Control villages.",notes:"Carry your CNIC: there are army checkposts in the valley. Landslides after heavy rain."},
+ {id:"babusar",name:"Kaghan to Babusar Top",to:"Naran",diff:"Hard",days:2,season:"Jun–Sep (pass open)",surf:{paved:80,broken:15,gravel:5},
+  wp:[["Islamabad",0,540],["Abbottabad",120,1260],["Mansehra",145,1090],["Balakot",185,980],["Kaghan",245,2000],["Naran",270,2410],["Lulusar Lake",320,3410],["Babusar Top",340,4170]],
+  stages:[["Islamabad → Naran",270],["Naran → Babusar Top and back",140]],
+  about:"The summer favourite. Up the Kaghan Valley to Naran, then over 4,000 m to Babusar Top.",notes:"Thin air and cold above 3,500 m. Glacier water crossings near Lulusar in June. Fill up in Naran."},
+ {id:"kkh-hunza",name:"Karakoram Highway to Hunza",to:"Hunza (Karimabad)",diff:"Hard",days:3,season:"Apr–Oct",surf:{paved:75,broken:20,gravel:5},
+  wp:[["Islamabad",0,540],["Abbottabad",120,1260],["Besham",270,600],["Dasu",345,800],["Chilas",470,1265],["Raikot Bridge",520,1250],["Gilgit",600,1500],["Karimabad",700,2440]],
+  stages:[["Islamabad → Besham",270],["Besham → Chilas",200],["Chilas → Karimabad",230]],
+  about:"Multi-day tour along the Indus on the KKH, past Nanga Parbat viewpoints into Hunza.",notes:"Long fuel gaps after Besham. Rockfall zones near Dasu and Chilas: don't ride after dark."},
+ {id:"khunjerab",name:"Khunjerab Pass Finish",to:"Khunjerab Pass",diff:"Hard",days:5,season:"May–Nov (border pass open)",surf:{paved:85,broken:12,gravel:3},
+  wp:[["Islamabad",0,540],["Besham",270,600],["Chilas",470,1265],["Gilgit",600,1500],["Karimabad",700,2440],["Attabad Lake",730,2550],["Passu",755,2450],["Sost",785,2800],["Khunjerab Pass",870,4690]],
+  stages:[["Islamabad → Besham",270],["Besham → Chilas",200],["Chilas → Karimabad",230],["Karimabad → Sost",85],["Sost → Khunjerab and back",170]],
+  about:"The big one: the full KKH to the China border at about 4,700 m, the highest paved border crossing in the world.",notes:"Entry permit and fee at Sost/park gate. Severe cold and altitude at the top. Keep the stay at the pass short."},
+ {id:"skardu",name:"Indus Road to Skardu",to:"Skardu",diff:"Hard",days:3,season:"Apr–Oct",surf:{paved:70,broken:25,gravel:5},
+  wp:[["Islamabad",0,540],["Besham",270,600],["Chilas",470,1265],["Jaglot",560,1300],["Shengus",640,1700],["Skardu",730,2230]],
+  stages:[["Islamabad → Besham",270],["Besham → Chilas",200],["Chilas → Skardu",260]],
+  about:"Through the Indus gorge on the Jaglot–Skardu road into Baltistan.",notes:"Narrow gorge road with sheer drops and rockfall. Check road status before leaving Jaglot."}
+];
+const RK={Easy:1,Moderate:2,Hard:3};
+const LEVELS=["Easy","Moderate","Hard"];
+const HL_TYPES=[["fuel","Fuel"],["food","Food & tea"],["view","Viewpoint"],["mechanic","Mechanic"],["stay","Stay"],["check","Checkpost"],["hazard","Hazard"]];
+ROUTES.forEach(r=>{r.km=r.wp[r.wp.length-1][1];r.gain=r.wp.reduce((s,p,i)=>i&&p[2]>r.wp[i-1][2]?s+p[2]-r.wp[i-1][2]:s,0);r.top=r.wp.reduce((a,p)=>p[2]>a[2]?p:a);if(!KM[r.to])KM[r.to]=r.km});
+const routeById=id=>ROUTES.find(r=>r.id===id);
+const GENDERS=["Male","Female","Prefer not to say"];
+const BLOOD=["A+","A-","B+","B-","AB+","AB-","O+","O-","Don't know"];
+const LICCAT=["Motorcycle","Motorcycle + Car","Learner permit"];
+const PROV=["Islamabad (ICT)","Punjab","Khyber Pakhtunkhwa","Sindh","Balochistan","Gilgit-Baltistan","AJK"];
+const CNIC_RE=/^\d{5}-\d{7}-\d$/;
+const SAMPLE={
+ "sample-1":{name:"Hamza R.",area:"G-11",phone:"0300-0000001",years:6,styles:["Northern areas","Long tours"],bike:{make:"Honda",model:"CB 150F",cc:150,type:"Standard"},dest:["Skardu","Naran"],bio:"Did Khunjerab twice. Prefer early starts and steady pace.",dates:[]},
+ "sample-2":{name:"Ayesha K.",area:"F-10",phone:"0300-0000002",years:3,styles:["Day trips","Photography"],bike:{make:"Suzuki",model:"GS 150",cc:150,type:"Standard"},dest:["Nathia Gali","Pir Sohawa"],bio:"Weekend rider, likes sunrise runs up Margalla Road.",dates:[]},
+ "sample-3":{name:"Usman T.",area:"Bahria Town",phone:"0300-0000003",years:9,styles:["Off-road","Camping"],bike:{make:"Kawasaki",model:"KLX 250",cc:250,type:"Dirt / Trail"},dest:["Fairy Meadows (Raikot)","Keran, Neelum"],bio:"Carries a tyre repair kit and spare tubes for the group.",dates:[]},
+ "sample-4":{name:"Bilal S.",area:"Rawalpindi Saddar",phone:"0300-0000004",years:2,styles:["Night rides","Day trips"],bike:{make:"Yamaha",model:"YBR 125G",cc:125,type:"Adventure"},dest:["Murree","Khanpur Dam"],bio:"New to touring, looking for a group to learn with.",dates:[]}
+};
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pad=n=>String(n).padStart(2,"0");
+const ds=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const parse=s=>{const[y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)};
+const TODAY=ds(new Date());
+const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const WD=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const nice=s=>{const d=parse(s);return WD[d.getDay()]+" "+d.getDate()+" "+MON[d.getMonth()]};
+const short=s=>{const d=parse(s);return d.getDate()+" "+MON[d.getMonth()]};
+const future=a=>(a||[]).filter(x=>x>=TODAY).sort();
+const COLORS=["#0E5A47","#8A4B12","#3B4F8C","#7A2E4D","#2F6B6B","#6B5A12","#4E3A7A","#9A3B2A"];
+const colorOf=id=>{let h=0;for(const c of id)h=(h*31+c.charCodeAt(0))>>>0;return COLORS[h%COLORS.length]};
+const initials=n=>(n||"?").trim().split(/\s+/).slice(0,2).map(w=>w[0]).join("").toUpperCase();
+const okPhoto=p=>typeof p==="string"&&p.startsWith("data:image/jpeg;base64,")&&p.length<150000;
+const av=(id,n,photo)=>{const p=photo!==undefined?photo:allRiders()[id]?.photo;
+  return okPhoto(p)?`<span class="av"><img src="${p}" alt="${esc(n||"Rider")}"></span>`:`<span class="av" style="background:${colorOf(id)}">${esc(initials(n))}</span>`};
+function resizePhoto(file){return new Promise((res,rej)=>{
+  if(!/^image\//.test(file.type))return rej(new Error("Choose an image file (JPG, PNG or WebP)"));
+  if(file.size>15*1024*1024)return rej(new Error("That image is over 15 MB. Choose a smaller one"));
+  const url=URL.createObjectURL(file);const img=new Image();
+  img.onload=()=>{const s=Math.min(img.naturalWidth,img.naturalHeight);const size=320;const c=document.createElement("canvas");c.width=c.height=size;
+    const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,size,size);
+    x.drawImage(img,(img.naturalWidth-s)/2,(img.naturalHeight-s)/2,s,s,0,0,size,size);URL.revokeObjectURL(url);
+    let q=.85,out=c.toDataURL("image/jpeg",q);while(out.length>120000&&q>.4){q-=.1;out=c.toDataURL("image/jpeg",q)}res(out)};
+  img.onerror=()=>{URL.revokeObjectURL(url);rej(new Error("Couldn't read that image. Try a JPG or PNG"))};img.src=url})}
+
+// seed sample dates relative to today so the preview stays current
+(function(){const base=new Date();const pick=offs=>offs.map(o=>{const d=new Date(base);d.setDate(d.getDate()+o);return ds(d)});
+ const G=["Male","Female","Male","Male"];Object.values(SAMPLE).forEach((s,i)=>{s.gender=G[i];s.docs={licence:true,reg:true,helmet:true,insured:i%2===0,cnic:true,papers:true}});
+ SAMPLE["sample-1"].dates=pick([5,6,12,13,14,26,27]);SAMPLE["sample-2"].dates=pick([5,6,19,20]);SAMPLE["sample-3"].dates=pick([12,13,14,15,26]);SAMPLE["sample-4"].dates=pick([6,20,27]);})();
+
+const S={riders:{},rides:[],uid:null,db:null,live:false,loading:true,error:"",readOnly:false,demo:false,
+  verified:{},myVerify:null,vdraft:null,canEdit:false,gender:"",editId:null,editVerify:null,highlights:[],rdiff:"",rdays:"",openRoute:null,
+  tab:"riders",q:"",type:"",date:"",shared:false,calMonth:null,selDate:null,draft:null,pMonth:null};
+{const n=new Date();S.calMonth=new Date(n.getFullYear(),n.getMonth(),1);S.pMonth=new Date(n.getFullYear(),n.getMonth(),1);}
+
+function allRiders(){return S.demo?{...SAMPLE,...S.riders}:S.riders}
+function me(){return S.uid?S.riders[S.uid]:null}
+function myDates(){return future(me()?.dates)}
+function overlap(r){const m=new Set(myDates());return future(r.dates).filter(d=>m.has(d))}
+
+function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,2600)}
+
+/* ---------- header ---------- */
+function renderStats(){
+  const rs=allRiders();const ids=Object.keys(rs);
+  const now=new Date();const wk=[];for(let i=0;i<7;i++){const d=new Date(now);d.setDate(d.getDate()+i);wk.push(ds(d))}
+  const freeWeek=ids.filter(id=>future(rs[id].dates).some(d=>wk.includes(d))).length;
+  const up=S.rides.filter(r=>r.date>=TODAY).length;
+  const odo=n=>String(Math.min(n,999)).padStart(3,"0").split("").map(c=>`<i>${c}</i>`).join("");
+  const pct=ids.length?Math.round(freeWeek/ids.length*100):0;
+  $("#stats").innerHTML=`<div class="tile gauge"><div class="ring" style="--p:${pct}"><b>${freeWeek}</b><span>/${ids.length}</span></div><div><div class="g-l">Free to ride</div><div class="hint">in the next 7 days</div></div></div>
+   <div class="tile"><div class="odo" aria-label="${ids.length}">${odo(ids.length)}</div><div class="g-l">Riders listed</div></div>
+   <div class="tile"><div class="odo" aria-label="${up}">${odo(up)}</div><div class="g-l">Rides planned</div></div>`;
+}
+function renderNotice(){
+  let h="";
+  if(S.standalone){$("#notice").innerHTML=`<div class="banner"><b>Public preview.</b> You're browsing the open web version with sample riders, which are examples, not real people. Routes, highlights and the calendar all work here. The live club board, where riders post profiles and join rides, runs on <a href="${LIVE_URL}" target="_blank" rel="noopener" style="color:var(--amber)">the members' app</a>.</div>`;return}
+  if(S.demo) h+=`<div class="banner"><b>Sample riders shown.</b> Cards marked “sample” are examples to show how the app works, not real people. <span class="spacer"></span><button class="btn ghost" data-act="demo-off">Hide samples</button></div>`;
+  if(!S.live&&!S.loading) h+=`<div class="banner"><b>${S.error?esc(S.error):"Shared data isn't connected in this view."}</b> Open the app on claude.ai while signed in to share your profile with other riders.</div>`;
+  else if(S.readOnly) h+=`<div class="banner"><b>You can browse but not post.</b> Ask the app owner for Contributor access to add your profile and join rides.</div>`;
+  $("#notice").innerHTML=h;
+}
+
+/* ---------- riders tab ---------- */
+function badges(id,r){const d=r.docs||{};const b=[];
+  if(S.verified[id])b.push(["ok","Verified by admin"]);
+  if(d.licence)b.push(["","Licence"]);if(d.reg)b.push(["","Registered bike"]);if(d.helmet)b.push(["","Helmet"]);
+  if(d.insured)b.push(["","Insured"]);if(d.cnic)b.push(["","CNIC on file"]);
+  return b.length?`<div class="chips">${b.map(([c,t])=>`<span class="badge ${c}">✓ ${t}</span>`).join("")}</div>`:""}
+function riderCard(id,r){
+  const ov=S.uid&&id!==S.uid?overlap(r):[];const ovs=new Set(ov);
+  const dates=future(r.dates);const show=dates.slice(0,5);
+  const sample=id.startsWith("sample-");
+  return `<article class="card${ov.length?" matched":""}">
+    <div class="cover"><span class="row" style="gap:6px"><span class="type">${esc(r.bike?.type||"Bike")}</span>${r.level?`<span class="type">${esc(r.level)} routes</span>`:""}${(()=>{const n=S.rides.filter(x=>x.date<TODAY&&(x.riders||[]).includes(id)).length;return n?`<span class="type">${n} club ride${n>1?"s":""}</span>`:""})()}</span>${ov.length?`<span class="match-pill">${ov.length} date match</span>`:""}</div>
+    <div class="who">${av(id,r.name)}<div style="min-width:0"><h3>${esc(r.name||"Rider")}${sample?'<span class="sample-tag">sample</span>':""}${id===S.uid?'<span class="sample-tag" style="color:var(--ok);border-color:var(--ok)">you</span>':""}${r.managed?'<span class="sample-tag" style="color:var(--muted);border-color:var(--line)">listed by admin</span>':""}</h3><small>${r.gender&&r.gender!=="Prefer not to say"?esc(r.gender)+" · ":""}${esc(r.area||"Islamabad")} · ${Number(r.years)||0} yrs riding</small></div></div>
+    ${badges(id,r)}
+    <div class="plate"><div class="cc">${Number(r.bike?.cc)||"—"}</div><div class="bk"><b>${esc((r.bike?.make||"")+" "+(r.bike?.model||""))}</b><span>${esc(r.bike?.type||"Bike")}${(r.dest||[]).length?" · wants "+esc(r.dest.slice(0,2).join(", ")):""}</span></div></div>
+    ${(r.styles||[]).length?`<div class="chips">${r.styles.map(s=>`<span class="chip">${esc(s)}</span>`).join("")}</div>`:""}
+    <div><div class="lbl" style="margin-bottom:6px">Free to ride</div>${show.length?`<div class="chips">${show.map(d=>`<span class="chip date${ovs.has(d)?" shared":""}">${short(d)}</span>`).join("")}${dates.length>5?`<span class="chip date">+${dates.length-5}</span>`:""}</div>`:`<span class="hint">No upcoming dates yet</span>`}</div>
+    <div class="actions"><button class="btn" data-act="view" data-id="${esc(id)}">Profile</button>${r.managed&&S.canEdit?`<button class="btn" data-act="edit-rider" data-id="${esc(id)}">Edit</button>`:""}${id!==S.uid?`<button class="btn primary" data-act="invite" data-id="${esc(id)}">Plan a ride</button>`:`<button class="btn" data-act="tab" data-tab="profile">Edit</button>`}</div>
+  </article>`;
+}
+function renderRiders(){
+  const rs=allRiders();
+  let ids=Object.keys(rs);
+  const q=S.q.trim().toLowerCase();
+  ids=ids.filter(id=>{const r=rs[id];
+    if(q&&!`${r.name} ${r.area} ${r.bike?.make} ${r.bike?.model} ${(r.dest||[]).join(" ")}`.toLowerCase().includes(q))return false;
+    if(S.type&&r.bike?.type!==S.type)return false;
+    if(S.gender&&r.gender!==S.gender)return false;
+    if(S.date&&!(r.dates||[]).includes(S.date))return false;
+    if(S.shared&&(id===S.uid||!overlap(r).length))return false;
+    return true});
+  ids.sort((a,b)=>(b===S.uid)-(a===S.uid)||overlap(rs[b]).length-overlap(rs[a]).length||(future(rs[a].dates)[0]||"9").localeCompare(future(rs[b].dates)[0]||"9"));
+  const total=Object.keys(rs).length;
+  let body;
+  if(S.loading&&!total) body=`<div class="empty"><h3>Loading riders…</h3><p>Fetching profiles from the club board.</p></div>`;
+  else if(!total) body=`<div class="empty"><h3>No riders listed yet</h3><p>Be the first. Add your bike and the dates you're free, and riders who share them will show up here with a match badge.</p><div class="row" style="justify-content:center"><button class="btn primary" data-act="tab" data-tab="profile">Create my rider profile</button><button class="btn" data-act="demo-on">Preview with sample riders</button></div></div>`;
+  else if(!ids.length) body=`<div class="empty"><h3>No riders match these filters</h3><p>Try another date or clear the filters.</p><button class="btn" data-act="clear">Clear filters</button></div>`;
+  else body=`<div class="grid">${ids.map(id=>riderCard(id,rs[id])).join("")}</div>`;
+  $("#view").innerHTML=`
+   ${S.canEdit&&S.live?`<div class="sec-head"><h2>Riders</h2><button class="btn primary" data-act="add-rider">+ Add a rider</button></div>`:""}
+   <div class="filters">
+     <div class="field"><label for="fq">Search</label><input type="text" id="fq" placeholder="Name, bike, sector or destination" value="${esc(S.q)}"></div>
+     <div class="field"><label for="ft">Bike type</label><select id="ft"><option value="">All types</option>${TYPES.map(t=>`<option${S.type===t?" selected":""}>${t}</option>`).join("")}</select></div>
+     <div class="field"><label for="fg">Gender</label><select id="fg"><option value="">Everyone</option>${GENDERS.slice(0,2).map(g=>`<option${S.gender===g?" selected":""}>${g}</option>`).join("")}</select></div>
+     <div class="field"><label for="fd">Free on</label><input type="date" id="fd" min="${TODAY}" value="${S.date}"></div>
+     <label class="check"><input type="checkbox" id="fs"${S.shared?" checked":""}${me()?"":" disabled"}> Shares my dates</label>
+   </div>${body}`;
+}
+
+/* ---------- calendar tab ---------- */
+function countsByDay(){const c={};const rs=allRiders();for(const id in rs)for(const d of future(rs[id].dates))(c[d]=c[d]||[]).push(id);return c}
+function monthCells(m){const first=new Date(m.getFullYear(),m.getMonth(),1);const start=new Date(first);start.setDate(1-first.getDay());const cells=[];for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);cells.push(d)}
+  // trim trailing week if entirely next month
+  while(cells.length>35&&cells[cells.length-7].getMonth()!==m.getMonth())cells.splice(-7);return cells}
+function renderCalendar(){
+  const c=countsByDay();const rs=allRiders();const mine=new Set(myDates());
+  const max=Math.max(1,...Object.values(c).map(a=>a.length));
+  const m=S.calMonth;
+  const cells=monthCells(m).map(d=>{const k=ds(d);const n=(c[k]||[]).length;const out=d.getMonth()!==m.getMonth();const past=k<TODAY;
+    const heat=n?Math.round(18+70*n/max):0;
+    const cls=["day",n?"has":"",heat>50?"hot":"",mine.has(k)?"mine":"",S.selDate===k?"sel":"",past?"past":"",out?"out":"",k===TODAY?"today":""].join(" ");
+    return `<button class="${cls}" style="--heat:${heat}" data-act="day" data-d="${k}"${past||out?" disabled":""} aria-label="${nice(k)}, ${n} riders free"><span class="n">${d.getDate()}</span><span class="c">${n?n+" free":""}</span></button>`}).join("");
+  const sel=S.selDate;const list=sel?(c[sel]||[]):[];
+  $("#view").innerHTML=`<div class="cal-layout">
+   <div class="cal">
+     <div class="cal-head"><h2>${["January","February","March","April","May","June","July","August","September","October","November","December"][m.getMonth()]} ${m.getFullYear()}</h2>
+       <button class="btn ghost" data-act="cal" data-dir="-1" aria-label="Previous month">‹</button><button class="btn ghost" data-act="cal" data-dir="1" aria-label="Next month">›</button></div>
+     <div class="cal-grid">${WD.map(w=>`<div class="dow">${w}</div>`).join("")}${cells}</div>
+     <div class="legend"><span><i style="background:var(--sign)"></i>More riders free</span><span><i style="background:var(--amber);border-radius:50%"></i>You're free</span></div>
+   </div>
+   <div class="side">${sel?`<h2>${nice(sel)}</h2><p class="sub">${list.length} rider${list.length===1?"":"s"} free this day</p>
+     <div class="mini">${list.map(id=>{const r=rs[id];return `<button class="mini-item" data-act="view" data-id="${esc(id)}">${av(id,r.name)}<div><b>${esc(r.name||"Rider")}${id===S.uid?" (you)":""}</b><span>${esc((r.bike?.make||"")+" "+(r.bike?.model||""))} · ${esc(r.area||"")}</span></div></button>`}).join("")||`<p class="hint">Nobody has marked this day yet.</p>`}</div>
+     <div class="row" style="margin-top:14px"><button class="btn primary" data-act="plan" data-d="${sel}">Plan a ride on ${short(sel)}</button></div>`
+   :`<h2>Pick a day</h2><p class="sub">Darker days have more riders free. Tap one to see who's available and start a group ride.</p>
+     ${Object.keys(c).length?`<div class="lbl" style="margin:14px 0 8px">Busiest upcoming days</div><div class="mini">${Object.entries(c).sort((a,b)=>b[1].length-a[1].length||a[0].localeCompare(b[0])).slice(0,5).map(([d,a])=>`<button class="mini-item" data-act="day" data-d="${d}"><div><b>${nice(d)}</b><span>${a.length} rider${a.length>1?"s":""} free</span></div></button>`).join("")}</div>`:`<div class="empty" style="margin-top:12px"><p>No availability posted yet. Add your dates in My profile.</p></div>`}`}
+   </div></div>`;
+}
+
+/* ---------- rides tab ---------- */
+function names(ids){const rs=allRiders();return (ids||[]).map(id=>rs[id]?.name||"Rider")}
+function renderRides(){
+  const up=S.rides.filter(r=>r.date>=TODAY).sort((a,b)=>a.date.localeCompare(b.date));
+  const body=up.length?`<div class="list">${up.map(r=>{const d=parse(r.date);const joined=S.uid&&(r.riders||[]).includes(S.uid);const org=r.organizer===S.uid;
+    const inv=(r.invited||[]).filter(x=>!(r.riders||[]).includes(x));
+    return `<article class="ride"><div class="dateblock"><div class="m">${MON[d.getMonth()].toUpperCase()}</div><div class="d">${d.getDate()}</div><div class="w">${WD[d.getDay()]}</div></div>
+     <div style="min-width:0"><h3>${esc(r.title||r.dest)}</h3>
+      <div class="meta">${r.meet?`<span>Meet: ${esc(r.meet)}${r.time?" at "+esc(r.time):""}</span>`:`<span>Meeting point to be shared</span>`}</div>
+      ${(()=>{const rt=routeById(r.routeId);const km=rt?rt.km:KM[r.dest];
+        return `<div class="route"><span class="pin">ISB</span><span class="line"><span>${km?`~${km} km · ~${rideTime(km)}`:"route TBD"}</span></span><span class="pin end">${esc(r.dest)}</span></div>
+        ${rt?`<div class="ride-rt"><button class="rhead mini-elev" data-act="route" data-id="${rt.id}" aria-label="View route ${esc(rt.name)}">${elevSvg(rt,false)}</button><div class="row" style="gap:8px">${diffPill(rt.diff)}<span class="hint">↑${(Math.round(rt.gain/100)*100).toLocaleString()} m · top ${rt.top[2].toLocaleString()} m${rt.days>1?" · "+rt.days+" days":""}</span><button class="btn ghost" style="padding:3px 10px;font-size:12.5px" data-act="route" data-id="${rt.id}">Route details</button></div></div>`:""}`})()}
+      ${r.notes?`<p>${esc(r.notes)}</p>`:""}
+      <div class="lbl" style="margin-bottom:6px">${(r.riders||[]).length} going</div>
+      <div class="chips" style="margin-bottom:${inv.length?6:12}px">${(r.riders||[]).map(id=>`<span class="chip">${esc(allRiders()[id]?.name||"Rider")}${id===r.organizer?" · lead":""}</span>`).join("")}</div>
+      ${inv.length?`<div class="hint" style="margin-bottom:12px">Invited: ${esc(names(inv).join(", "))}</div>`:""}
+      <div class="row">${joined?(org?"":`<button class="btn" data-act="leave" data-id="${esc(r._id)}">Leave ride</button>`):`<button class="btn primary" data-act="join" data-id="${esc(r._id)}"${S.live&&!S.readOnly?"":" disabled"}>Join this ride</button>`}${org?`<button class="btn danger ghost" data-act="cancel" data-id="${esc(r._id)}">Cancel ride</button>`:""}</div>
+     </div></article>`}).join("")}</div>`
+    :`<div class="empty"><h3>No group rides planned yet</h3><p>Pick a date when other riders are free and put a ride up. Anyone can join.</p><button class="btn primary" data-act="plan">Plan a ride</button></div>`;
+  const past=S.rides.filter(r=>r.date<TODAY).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,20);
+  const totalKm=past.reduce((s,r)=>s+((routeById(r.routeId)?.km||KM[r.dest]||0)*2)*(r.riders||[]).length,0);
+  const log=past.length?`<div class="sec-head" style="margin-top:34px"><h2>Ride log</h2><span class="hint">${past.length} past ride${past.length>1?"s":""} · ~${totalKm.toLocaleString()} km ridden together (return trips)</span></div>
+    <div class="mini">${past.map(r=>`<div class="mini-item" style="cursor:default"><div class="dateblock" style="width:52px"><div class="m">${MON[parse(r.date).getMonth()].toUpperCase()}</div><div class="d" style="font-size:22px">${parse(r.date).getDate()}</div></div><div><b>${esc(r.title||r.dest)}</b><span>${esc(r.dest)} · ${(r.riders||[]).length} rode · ${esc(names(r.riders).slice(0,4).join(", "))}${(r.riders||[]).length>4?"…":""}</span></div>${r.routeId?`<button class="btn ghost" style="padding:3px 10px;font-size:12.5px" data-act="route" data-id="${esc(r.routeId)}">Route</button>`:""}</div>`).join("")}</div>`:"";
+  $("#view").innerHTML=`<div class="sec-head"><h2>Upcoming group rides</h2><button class="btn ghost" data-act="tab" data-tab="routes">Browse routes</button><button class="btn primary" data-act="plan">Plan a ride</button></div>${body}${log}`;
+}
+
+/* ---------- profile tab ---------- */
+function newDraft(){const r=S.editId?S.riders[S.editId]:me();const d=r?JSON.parse(JSON.stringify(r)):{name:"",area:"",phone:"",years:"",styles:[],bike:{make:"",model:"",cc:"",type:"Standard"},dest:[],bio:"",dates:[]};d.gender=d.gender||"";return d}
+function newVDraft(){const src=S.editId?S.editVerify:S.myVerify;return src?JSON.parse(JSON.stringify(src)):{legalName:"",cnic:"",dob:"",blood:"",licNo:"",licExp:"",licCat:"",regNo:"",regProv:"",ecName:"",ecPhone:"",helmet:false,insured:false,papers:false,agree:false}}
+function ageOn(dob){const b=parse(dob),n=new Date();let a=n.getFullYear()-b.getFullYear();if(n.getMonth()<b.getMonth()||(n.getMonth()===b.getMonth()&&n.getDate()<b.getDate()))a--;return a}
+const LOCK=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>`;
+function legalFieldset(){const v=S.vdraft;const M=!!S.editId;const sel=(id,opts,val,ph)=>`<select id="${id}"><option value="">${ph}</option>${opts.map(o=>`<option${val===o?" selected":""}>${o}</option>`).join("")}</select>`;
+  const R=M?"":` <span class="req">*</span>`;
+  const f=(id,label,inner,hint)=>`<div class="field"><label for="${id}">${label}${R}</label>${inner}${hint?`<p class="hint">${hint}</p>`:""}</div>`;
+  return `<fieldset style="grid-column:1/-1"><legend>Legal &amp; safety details</legend>
+   <div class="private">${LOCK}<div><b>Kept private.</b> ${M?"Only the app's admins can see these details. They're optional here: fill in what you've checked with the rider. Badges only show for details you enter.":"Only you and the app's admins (the owner and anyone given Editor access) can see these details. Other riders only see check badges such as “Licence” and “CNIC on file”, never the numbers."}</div></div>
+   <div class="legal-grid">
+    ${f("v-legal","Full name as on CNIC",`<input type="text" id="v-legal" maxlength="60" value="${esc(v.legalName)}">`)}
+    ${f("v-cnic","CNIC number",`<input type="text" id="v-cnic" inputmode="numeric" maxlength="15" placeholder="12345-1234567-1" value="${esc(v.cnic)}">`,"13 digits, dashes are added for you")}
+    ${f("v-dob","Date of birth",`<input type="date" id="v-dob" max="${TODAY}" value="${esc(v.dob)}">`,"You must be 18 or older to hold a motorcycle licence")}
+    ${f("v-blood","Blood group",sel("v-blood",BLOOD,v.blood,"Choose"),"Shared with the ride lead only in an emergency")}
+    ${f("v-lic","Driving licence number",`<input type="text" id="v-lic" maxlength="30" value="${esc(v.licNo)}">`)}
+    ${f("v-licexp","Licence valid until",`<input type="date" id="v-licexp" min="${TODAY}" value="${esc(v.licExp)}">`)}
+    ${f("v-liccat","Licence category",sel("v-liccat",LICCAT,v.licCat,"Choose"),"A learner permit doesn't allow riding with a pillion")}
+    ${f("v-reg","Bike registration number",`<input type="text" id="v-reg" maxlength="20" placeholder="e.g. ICT ABC-123" value="${esc(v.regNo)}">`)}
+    ${f("v-regprov","Registered in",sel("v-regprov",PROV,v.regProv,"Choose"))}
+    ${f("v-ecn","Emergency contact name",`<input type="text" id="v-ecn" maxlength="40" value="${esc(v.ecName)}">`)}
+    ${f("v-ecp","Emergency contact phone",`<input type="tel" id="v-ecp" maxlength="20" placeholder="03xx-xxxxxxx" value="${esc(v.ecPhone)}">`)}
+   </div>
+   <div class="ticks">
+    <label><input type="checkbox" id="v-helmet"${v.helmet?" checked":""}><span>${M?"The rider wears":"I wear"} a helmet on every ride. Helmets are compulsory for riders in Islamabad.${R}</span></label>
+    <label><input type="checkbox" id="v-papers"${v.papers?" checked":""}><span>${M?"The rider's":"My"} bike's registration book is in ${M?"their":"my"} name or ${M?"they carry":"I carry"} the owner's permission, and its token tax is paid.${R}</span></label>
+    <label><input type="checkbox" id="v-ins"${v.insured?" checked":""}><span>${M?"The rider's":"My"} bike has valid motor insurance (at least third-party cover).</span></label>
+    <label${M?" hidden":""}><input type="checkbox" id="v-agree"${v.agree?" checked":""}><span>I'm 18 or older. I'll follow traffic laws, carry my CNIC, licence and registration papers on every ride (checkposts on northern routes ask for them), and I ride on group tours at my own risk. <span class="req">*</span></span></label>
+   </div>
+   <p class="hint">Rules can change. Check current requirements with Islamabad Traffic Police and your provincial Excise &amp; Taxation department.</p>
+  </fieldset>`}
+function renderProfile(){
+  if(!S.draft)S.draft=newDraft();if(!S.vdraft)S.vdraft=newVDraft();const d=S.draft;const M=!!S.editId;const isNew=M&&!S.riders[S.editId];
+  $("#view").innerHTML=`${M?`<div class="sec-head"><h2>${isNew?"Add a rider":"Edit "+esc(d.name||"rider")}</h2><button type="button" class="btn" data-act="cancel-edit">Cancel</button></div>
+   <div class="banner"><b>Listing a rider for someone else.</b> Use this for riders who aren't on the app. Get their permission before posting their phone number and photo. They'll show as “Listed by admin”.</div>`:""}
+   <form class="form" id="pf" autocomplete="off">
+   <fieldset><legend>Rider</legend>
+     <div class="field"><span class="lbl">Profile picture</span><div class="photo-row"><span id="p-prev">${av(S.editId||S.uid||"me",d.name,d.photo||"")}</span>
+       <div style="display:grid;gap:6px"><div class="row"><label class="btn" for="p-photo" tabindex="0">${okPhoto(d.photo)?"Change photo":"Upload photo"}</label>${okPhoto(d.photo)?`<button type="button" class="btn ghost danger" data-act="rm-photo">Remove</button>`:""}</div>
+       <p class="hint">A clear face or you with your bike. Cropped to a square and shrunk to save space.</p></div>
+       <input type="file" id="p-photo" accept="image/jpeg,image/png,image/webp" hidden></div></div>
+     <div class="field"><label for="p-name">Name</label><input type="text" id="p-name" required maxlength="40" value="${esc(d.name)}" placeholder="e.g. Ali Raza"></div>
+     <div class="field"><label for="p-level">Comfortable riding</label><select id="p-level">${LEVELS.map(l=>`<option value="${l}"${(d.level||"Easy")===l?" selected":""}>${l} routes${l==="Easy"?" (city, short hills)":l==="Moderate"?" (mountain roads, 1–2 days)":" (high passes, multi-day KKH)"}</option>`).join("")}</select><p class="hint">Helps ride leads see who's ready for a route.</p></div>
+     <div class="field"><label for="p-gender">Gender <span class="req">*</span></label><select id="p-gender"><option value="">Choose</option>${GENDERS.map(g=>`<option${d.gender===g?" selected":""}>${g}</option>`).join("")}</select><p class="hint">Shown on your card so riders can find groups they're comfortable with.</p></div>
+     <div class="two"><div class="field"><label for="p-area">Area</label><select id="p-area"><option value="">Choose sector</option>${AREAS.map(a=>`<option${d.area===a?" selected":""}>${a}</option>`).join("")}</select></div>
+     <div class="field"><label for="p-years">Years riding</label><input type="number" id="p-years" min="0" max="60" value="${esc(d.years)}"></div></div>
+     <div class="field"><label for="p-phone">WhatsApp / phone</label><input type="tel" id="p-phone" maxlength="20" value="${esc(d.phone)}" placeholder="03xx-xxxxxxx"><p class="hint">Everyone using the app can see this so they can reach you.</p></div>
+     <div class="field"><span class="lbl">Riding style</span><div class="chips">${STYLES.map(s=>`<button type="button" class="chip pick" data-act="style" data-v="${s}" aria-pressed="${d.styles.includes(s)}">${s}</button>`).join("")}</div></div>
+     <div class="field"><label for="p-bio">About you</label><textarea id="p-bio" maxlength="300" placeholder="Pace, gear you carry, what kind of trips you like">${esc(d.bio)}</textarea></div>
+   </fieldset>
+   <fieldset><legend>Bike</legend>
+     <div class="three"><div class="field"><label for="b-make">Make</label><input type="text" id="b-make" maxlength="24" value="${esc(d.bike.make)}" placeholder="Honda"></div>
+     <div class="field"><label for="b-model">Model</label><input type="text" id="b-model" maxlength="30" value="${esc(d.bike.model)}" placeholder="CB 150F"></div>
+     <div class="field"><label for="b-cc">cc</label><input type="number" id="b-cc" min="50" max="2500" value="${esc(d.bike.cc)}" placeholder="150"></div></div>
+     <div class="field"><label for="b-type">Type</label><select id="b-type">${TYPES.map(t=>`<option${d.bike.type===t?" selected":""}>${t}</option>`).join("")}</select></div>
+     <div class="field"><span class="lbl">Places you want to ride</span><div class="chips">${DEST.map(([n,k])=>`<button type="button" class="chip pick" data-act="dest" data-v="${esc(n)}" aria-pressed="${d.dest.includes(n)}">${esc(n)}</button>`).join("")}</div></div>
+   </fieldset>
+   ${legalFieldset()}
+   <fieldset style="grid-column:1/-1"><legend>Dates I'm free to ride</legend>
+     <p class="hint">Tap days to mark them. Other riders see these and get a match when their dates line up with yours.</p>
+     <div id="pcal" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px"></div>
+     <div class="row"><span class="lbl" id="pcount"></span><span class="spacer"></span><button type="button" class="btn ghost" data-act="weekends">Mark all weekends (next 8 weeks)</button><button type="button" class="btn ghost" data-act="clear-dates">Clear dates</button></div>
+   </fieldset>
+   <div class="savebar">${M?`<button type="button" class="btn" data-act="cancel-edit">Cancel</button><button type="submit" class="btn amber" id="savebtn"${S.live?"":" disabled"}>${isNew?"List this rider":"Save rider"}</button>`
+     :`${me()?`<span class="hint">Last saved ${me().updatedAt?new Date(me().updatedAt).toLocaleDateString():""}</span>`:""}<button type="submit" class="btn amber" id="savebtn"${S.live&&!S.readOnly?"":" disabled"}>${me()?"Save changes":"Publish my profile"}</button>`}</div>
+  </form>`;
+  renderPCal();
+}
+function renderPCal(){
+  const d=S.draft;const set=new Set(d.dates);const months=[S.pMonth,new Date(S.pMonth.getFullYear(),S.pMonth.getMonth()+1,1)];
+  $("#pcal").innerHTML=months.map((m,i)=>`<div><div class="cal-head"><h2 style="font-size:20px">${["January","February","March","April","May","June","July","August","September","October","November","December"][m.getMonth()]} ${m.getFullYear()}</h2>${i===0?`<button type="button" class="btn ghost" data-act="pcal" data-dir="-1" aria-label="Earlier">‹</button>`:`<button type="button" class="btn ghost" data-act="pcal" data-dir="1" aria-label="Later">›</button>`}</div>
+   <div class="cal-grid">${WD.map(w=>`<div class="dow">${w[0]}</div>`).join("")}${monthCells(m).map(x=>{const k=ds(x);const out=x.getMonth()!==m.getMonth();const past=k<TODAY;const on=set.has(k);
+     return `<button type="button" class="day${on?" has hot":""}${past?" past":""}${out?" out":""}${k===TODAY?" today":""}" style="--heat:${on?90:0};aspect-ratio:auto;min-height:38px" data-act="pday" data-d="${k}"${past||out?" disabled":""} aria-pressed="${on}"><span class="n">${x.getDate()}</span></button>`}).join("")}</div></div>`).join("");
+  const n=future(d.dates).length;$("#pcount").textContent=n?`${n} day${n>1?"s":""} marked`:"No days marked";
+}
+function readForm(){const d=S.draft;const v=id=>$("#"+id).value;
+  d.name=v("p-name").trim();d.area=v("p-area");d.years=v("p-years");d.phone=v("p-phone").trim();d.bio=v("p-bio").trim();
+  d.bike={make:v("b-make").trim(),model:v("b-model").trim(),cc:v("b-cc"),type:v("b-type")};d.gender=v("p-gender");d.level=v("p-level");
+  const x=S.vdraft,c=id=>$("#"+id).checked;
+  Object.assign(x,{legalName:v("v-legal").trim(),cnic:v("v-cnic").trim(),dob:v("v-dob"),blood:v("v-blood"),licNo:v("v-lic").trim(),licExp:v("v-licexp"),licCat:v("v-liccat"),
+    regNo:v("v-reg").trim().toUpperCase(),regProv:v("v-regprov"),ecName:v("v-ecn").trim(),ecPhone:v("v-ecp").trim(),helmet:c("v-helmet"),insured:c("v-ins"),papers:c("v-papers"),agree:c("v-agree")});}
+function checkLegal(){const d=S.draft,x=S.vdraft;
+  if(S.editId){
+    for(const[id,val,msg]of[["p-name",d.name,"Add the rider's name"],["p-gender",d.gender,"Choose the rider's gender"],["b-make",d.bike.make,"Add the bike's make"],["b-model",d.bike.model,"Add the bike's model"]])if(!val)return[id,msg];
+    if(x.cnic&&!CNIC_RE.test(x.cnic))return["v-cnic","CNIC must be 13 digits in the form 12345-1234567-1"];
+    if(x.dob&&ageOn(x.dob)<18)return["v-dob","Riders must be 18 or older to be listed"];
+    if(x.licExp&&x.licExp<TODAY)return["v-licexp","That licence has expired"];
+    return null}
+  const need=[["p-name",d.name,"Add your name"],["p-gender",d.gender,"Choose your gender"],["b-make",d.bike.make,"Add your bike's make"],["b-model",d.bike.model,"Add your bike's model"],
+    ["v-legal",x.legalName,"Add your full name as it appears on your CNIC"]];
+  for(const[id,val,msg]of need)if(!val)return[id,msg];
+  if(!CNIC_RE.test(x.cnic))return["v-cnic","CNIC must be 13 digits in the form 12345-1234567-1"];
+  if(!x.dob)return["v-dob","Add your date of birth"];
+  if(ageOn(x.dob)<18)return["v-dob","Riders must be 18 or older to list a profile"];
+  if(!x.blood)return["v-blood","Choose your blood group, or “Don't know”"];
+  if(!x.licNo)return["v-lic","Add your driving licence number"];
+  if(!x.licExp)return["v-licexp","Add your licence expiry date"];
+  if(x.licExp<TODAY)return["v-licexp","Your licence has expired. Renew it before joining rides"];
+  if(!x.licCat)return["v-liccat","Choose your licence category"];
+  if(!x.regNo)return["v-reg","Add your bike's registration number"];
+  if(!x.regProv)return["v-regprov","Choose where your bike is registered"];
+  if(!x.ecName)return["v-ecn","Add an emergency contact name"];
+  if(!x.ecPhone)return["v-ecp","Add an emergency contact phone number"];
+  if(!x.helmet)return["v-helmet","Confirm you wear a helmet"];
+  if(!x.papers)return["v-papers","Confirm your registration papers and token tax"];
+  if(!x.agree)return["v-agree","Accept the rider agreement to publish"];
+  return null}
+
+/* ---------- dialogs ---------- */
+const dlg=$("#dlg");
+function openDlg(html){$("#dlgBody").innerHTML=html;if(!dlg.open)dlg.showModal()}
+function viewRider(id){const r=allRiders()[id];if(!r)return;const ov=S.uid&&id!==S.uid?overlap(r):[];
+  openDlg(`<div class="dlg"><div class="who">${av(id,r.name)}<div><h2>${esc(r.name)}</h2><small style="color:var(--muted)">${r.gender?esc(r.gender)+" · ":""}${esc(r.area||"Islamabad")}</small></div></div>
+   ${badges(id,r)}
+   <dl class="kv"><dt>Bike</dt><dd>${esc((r.bike?.make||"")+" "+(r.bike?.model||""))} · ${Number(r.bike?.cc)||"—"} cc · ${esc(r.bike?.type||"")}</dd>
+   <dt>Riding</dt><dd>${Number(r.years)||0} years${(r.styles||[]).length?" · "+esc(r.styles.join(", ")):""}</dd>
+   ${(r.dest||[]).length?`<dt>Wants to ride</dt><dd>${esc(r.dest.join(", "))}</dd>`:""}
+   ${r.bio?`<dt>About</dt><dd>${esc(r.bio)}</dd>`:""}
+   ${r.phone?`<dt>Contact</dt><dd><span class="phone" id="ph">${esc(r.phone)}</span> <button class="btn ghost" style="padding:3px 9px;font-size:12px" data-act="copy">Copy</button></dd>`:""}</dl>
+   <div><div class="lbl" style="margin-bottom:6px">Free to ride${ov.length?` · <span style="color:var(--ok)">${ov.length} match yours</span>`:""}</div><div class="chips">${future(r.dates).map(d=>`<span class="chip date${ov.includes(d)?" shared":""}">${nice(d)}</span>`).join("")||'<span class="hint">No upcoming dates</span>'}</div></div>
+   ${r.managed&&S.canEdit?`<div class="row"><button class="btn" data-act="edit-rider" data-id="${esc(id)}">Edit listing</button><button class="btn ghost danger" data-act="remove-rider" data-id="${esc(id)}">Remove rider</button></div>`:""}
+   ${S.canEdit&&!id.startsWith("sample-")?`<div class="adm" id="adm"><div class="lbl">Admin only · legal details</div><p class="hint">Loading…</p></div>`:""}
+   <div class="row"><span class="spacer"></span><button class="btn" data-act="close">Close</button>${id!==S.uid?`<button class="btn primary" data-act="invite" data-id="${esc(id)}">Plan a ride with ${esc((r.name||"").split(" ")[0])}</button>`:""}</div></div>`);
+  if(S.canEdit&&!id.startsWith("sample-"))loadAdmin(id)}
+async function loadAdmin(id){let v=null;try{const s=await S.db.doc("verify/"+id).get();v=s.exists?s.data():null}catch{}
+  const box=$("#adm");if(!box)return;const ver=S.verified[id];
+  box.innerHTML=`<div class="lbl" style="margin-bottom:8px">${LOCK.replace('aria-hidden','style="width:13px;height:13px;vertical-align:-2px" aria-hidden')} Admin only · legal details</div>`+(v?`<dl class="kv">
+    <dt>Name on CNIC</dt><dd>${esc(v.legalName)}</dd><dt>CNIC</dt><dd class="phone">${esc(v.cnic)}</dd>
+    <dt>Date of birth</dt><dd>${v.dob?esc(nice(v.dob))+" "+parse(v.dob).getFullYear()+" (age "+ageOn(v.dob)+")":""}</dd><dt>Blood group</dt><dd>${esc(v.blood)}</dd>
+    <dt>Licence</dt><dd>${esc(v.licNo)} · ${esc(v.licCat)} · valid until ${v.licExp?esc(short(v.licExp))+" "+parse(v.licExp).getFullYear():""}${v.licExp&&v.licExp<TODAY?' <b class="req">expired</b>':""}</dd>
+    <dt>Registration</dt><dd>${esc(v.regNo)} · ${esc(v.regProv)}</dd><dt>Insurance</dt><dd>${v.insured?"Yes":"No"}</dd>
+    <dt>Emergency</dt><dd>${esc(v.ecName)} · <span class="phone">${esc(v.ecPhone)}</span></dd></dl>
+    <div class="row" style="margin-top:10px">${ver?`<span class="badge ok">✓ Verified ${new Date(ver.at).toLocaleDateString()}</span><button class="btn ghost" data-act="unverify" data-id="${esc(id)}">Remove verification</button>`:`<button class="btn amber" data-act="verify" data-id="${esc(id)}">Mark as verified</button><span class="hint">After you've checked their CNIC and licence in person.</span>`}</div>`
+    :`<p class="hint">This rider hasn't submitted legal details yet.</p>`)}
+function planRide(date,inviteId,routeId){
+  if(!S.uid||!me()){openDlg(`<div class="dlg"><h2>Create your profile first</h2><p>Other riders need to see who's leading the ride and how to reach you.</p><div class="row"><span class="spacer"></span><button class="btn" data-act="close">Not now</button><button class="btn primary" data-act="close-profile">Create profile</button></div></div>`);return}
+  if(inviteId&&inviteId.startsWith("sample-")){toast("Sample riders can't be invited. They're only examples.");return}
+  const inv=inviteId?allRiders()[inviteId]:null;
+  if(!date&&inv){date=overlap(inv)[0]||future(inv.dates)[0]||""}
+  openDlg(`<form class="dlg" id="rf"><h2>Plan a group ride</h2>
+   ${inv?`<p class="hint">Inviting ${esc(inv.name)}. ${overlap(inv).length?"Shared free dates: "+overlap(inv).map(short).join(", "):"No shared dates yet, pick any day."}</p>`:""}
+   <div class="field"><label for="r-dest">Route or destination</label><select id="r-dest"><optgroup label="Club routes">${ROUTES.map(rt=>`<option value="route:${rt.id}"${routeId===rt.id?" selected":""}>${esc(rt.name)} · ${rt.km} km · ${rt.diff}${rt.days>1?" · "+rt.days+" days":""}</option>`).join("")}</optgroup><optgroup label="Other places">${DEST.map(([n,k])=>`<option value="${esc(n)}">${esc(n)} · ~${k} km</option>`).join("")}</optgroup></select><p class="hint">Club routes show their difficulty, climb and stages to everyone who joins.</p></div>
+   <div class="field"><label for="r-title">Ride name</label><input type="text" id="r-title" maxlength="50" placeholder="e.g. Sunday run to Nathia Gali"></div>
+   <div class="two"><div class="field"><label for="r-date">Date</label><input type="date" id="r-date" required min="${TODAY}" value="${date||""}"></div><div class="field"><label for="r-time">Start time</label><input type="text" id="r-time" maxlength="12" placeholder="6:00 AM"></div></div>
+   <div class="field"><label for="r-meet">Meeting point</label><input type="text" id="r-meet" maxlength="60" placeholder="e.g. Faisal Mosque parking"></div>
+   <div class="field"><label for="r-notes">Notes</label><textarea id="r-notes" maxlength="300" placeholder="Pace, fuel stops, gear required"></textarea></div>
+   <div class="row"><span class="spacer"></span><button type="button" class="btn" data-act="close">Cancel</button><button type="submit" class="btn primary" data-invite="${esc(inviteId||"")}">Post ride</button></div></form>`);
+}
+
+/* ---------- render router ---------- */
+/* ---------- routes tab ---------- */
+let gid=0;
+function elevSvg(rt,big){
+  const w=big?640:320,h=big?170:70,pl=big?40:2,pb=big?20:2,pt=big?18:4,pr=big?8:2;const p=rt.wp;const mk=rt.km;const top=Math.max(1500,Math.ceil(rt.top[2]*1.15/500)*500);
+  const x=k=>pl+(k/mk)*(w-pl-pr),y=a=>pt+(1-a/top)*(h-pt-pb);
+  const line=p.map((q,i)=>(i?"L":"M")+x(q[1]).toFixed(1)+" "+y(q[2]).toFixed(1)).join(" ");const g="eg"+(++gid);
+  let s=`<svg class="elev" viewBox="0 0 ${w} ${h}"${big?"":` preserveAspectRatio="none"`} role="img" aria-label="Elevation profile, highest point ${rt.top[0]} at about ${rt.top[2]} m"><defs><linearGradient id="${g}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--sign);stop-opacity:.55"/><stop offset="1" style="stop-color:var(--sign);stop-opacity:.03"/></linearGradient></defs>`;
+  if(big){for(let a=1000;a<top;a+=1000)s+=`<line x1="${pl}" x2="${w-pr}" y1="${y(a)}" y2="${y(a)}" style="stroke:var(--line)" stroke-dasharray="3 4"/><text x="${pl-6}" y="${y(a)+4}" text-anchor="end" style="fill:var(--muted);font:10px var(--mono)">${a/1000}k m</text>`;
+    s+=`<text x="${pl}" y="${h-4}" style="fill:var(--muted);font:10px var(--mono)">0 km</text><text x="${w-pr}" y="${h-4}" text-anchor="end" style="fill:var(--muted);font:10px var(--mono)">${mk} km</text>`}
+  s+=`<path d="${line} L${x(mk)} ${h-pb} L${x(0)} ${h-pb} Z" fill="url(#${g})"/><path d="${line}" fill="none" style="stroke:var(--sign)" stroke-width="${big?2.5:2}" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
+  if(big){const tx=x(rt.top[1]),ty=y(rt.top[2]);s+=`<circle cx="${tx}" cy="${ty}" r="4" style="fill:var(--amber)"/><text x="${tx>w*.7?tx-8:tx+8}" y="${Math.max(ty-6,12)}" text-anchor="${tx>w*.7?"end":"start"}" style="fill:var(--ink);font:600 11px var(--body)">${esc(rt.top[0])} · ${rt.top[2].toLocaleString()} m</text>`}
+  return s+"</svg>"}
+const SURF=[["paved","Paved"],["broken","Broken tarmac"],["gravel","Gravel"],["dirt","Dirt"]];
+function surfBar(rt){return `<div class="surf" role="img" aria-label="${SURF.filter(([k])=>rt.surf[k]).map(([k,l])=>l+" "+rt.surf[k]+"%").join(", ")}">${SURF.filter(([k])=>rt.surf[k]).map(([k])=>`<i class="s-${k}" style="flex:${rt.surf[k]}"></i>`).join("")}</div>`}
+function surfLegend(rt){return `<div class="legend">${SURF.filter(([k])=>rt.surf[k]).map(([k,l])=>`<span><i class="s-${k}"></i>${l} ${rt.surf[k]}%</span>`).join("")}</div>`}
+const diffPill=d=>`<span class="diff d-${d.toLowerCase()}">${d}</span>`;
+function upFor(rt){const rs=allRiders();return Object.keys(rs).filter(id=>RK[rs[id].level||"Easy"]>=RK[rt.diff]).length}
+function renderRoutes(){
+  const list=ROUTES.filter(r=>!S.rdiff||r.diff===S.rdiff).filter(r=>!S.rdays||(S.rdays==="1"?r.days===1:r.days>1));
+  $("#view").innerHTML=`<div class="sec-head"><h2>Club routes</h2><span class="hint">From Islamabad · distances and heights are approximate</span></div>
+   <div class="row" style="margin-bottom:16px">${["","Easy","Moderate","Hard"].map(d=>`<button class="chip pick" data-act="rdiff" data-v="${d}" aria-pressed="${S.rdiff===d}">${d||"All levels"}</button>`).join("")}
+    <span style="width:10px"></span>${[["","Any length"],["1","Day rides"],["m","Multi-day tours"]].map(([v,l])=>`<button class="chip pick" data-act="rdays" data-v="${v}" aria-pressed="${S.rdays===v}">${l}</button>`).join("")}</div>
+   <div class="grid">${list.map(rt=>{const hl=S.highlights.filter(h=>h.routeId===rt.id).length;const n=upFor(rt);return `<article class="card rcard">
+     <button class="rhead" data-act="route" data-id="${rt.id}" aria-label="Open ${esc(rt.name)}">${elevSvg(rt,false)}<span class="rdays">${rt.days>1?rt.days+"-day tour":"Day ride"}</span></button>
+     <div><div class="row" style="gap:8px;margin-bottom:4px">${diffPill(rt.diff)}<span class="hint">${esc(rt.season)}</span></div><h3 style="font-size:23px;text-transform:uppercase;line-height:1.05">${esc(rt.name)}</h3><small class="hint">Islamabad → ${esc(rt.to)}</small></div>
+     <div class="rstats"><div><b>${rt.km}</b><span>km</span></div><div><b>${rideTime(rt.km)}</b><span>ride time</span></div><div><b>↑${(Math.round(rt.gain/100)*100).toLocaleString()}</b><span>m climb</span></div><div><b>${rt.top[2].toLocaleString()}</b><span>m high</span></div></div>
+     ${surfBar(rt)}
+     <div class="row hint" style="gap:14px"><span>${hl} highlight${hl===1?"":"s"}</span><span>${n} rider${n===1?"":"s"} at this level</span></div>
+     <div class="actions"><button class="btn" data-act="route" data-id="${rt.id}">Route details</button><button class="btn primary" data-act="plan-route" data-id="${rt.id}">Plan group ride</button></div></article>`}).join("")}</div>`}
+function routeDetail(id){const rt=routeById(id);if(!rt)return;S.openRoute=id;
+  openDlg(`<div class="dlg" style="gap:16px"><div><div class="row" style="gap:8px;margin-bottom:6px">${diffPill(rt.diff)}<span class="hint">${rt.days>1?rt.days+"-day tour":"Day ride"} · ${esc(rt.season)}</span></div><h2>${esc(rt.name)}</h2><p class="hint" style="margin-top:6px">${esc(rt.about)}</p></div>
+   <div class="rstats"><div><b>${rt.km}</b><span>km one way</span></div><div><b>${rideTime(rt.km)}</b><span>riding</span></div><div><b>↑${(Math.round(rt.gain/100)*100).toLocaleString()}</b><span>m climb</span></div><div><b>${rt.top[2].toLocaleString()}</b><span>m highest</span></div></div>
+   <div class="elev-wrap">${elevSvg(rt,true)}</div>
+   <div><div class="lbl" style="margin-bottom:6px">Road surface</div>${surfBar(rt)}${surfLegend(rt)}</div>
+   ${rt.stages?`<div><div class="lbl" style="margin-bottom:8px">Stages</div><ol class="stages">${rt.stages.map(([n,k],i)=>`<li><b>Day ${i+1}</b><span>${esc(n)}</span><em>${k} km · ${rideTime(k)}</em></li>`).join("")}</ol></div>`:""}
+   <div><div class="lbl" style="margin-bottom:8px">Stops on the way</div><ol class="stops">${rt.wp.map(q=>`<li><span>${esc(q[0])}</span><em>km ${q[1]} · ${q[2].toLocaleString()} m</em></li>`).join("")}</ol></div>
+   <div class="private" style="border-color:color-mix(in srgb,var(--danger) 45%,var(--line))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--danger)" aria-hidden="true"><path d="M12 3 2 21h20z"/><path d="M12 10v5M12 18h.01"/></svg><div><b>Before you ride.</b> ${esc(rt.notes)}</div></div>
+   <div><div class="row" style="margin-bottom:8px"><div class="lbl">Rider highlights</div><span class="spacer"></span></div><div id="hl-list">${hlList(id)}</div>
+    ${S.uid&&S.live&&!S.readOnly?`<form id="hlf" class="hlf"><select id="h-type" aria-label="Type">${HL_TYPES.map(([v,l])=>`<option value="${v}">${l}</option>`).join("")}</select><input type="text" id="h-title" maxlength="50" placeholder="Place, e.g. Balakot petrol pump" aria-label="Place"><input type="text" id="h-note" maxlength="160" placeholder="Your tip for other riders" aria-label="Tip"><button class="btn" type="submit">Add highlight</button></form>`:`<p class="hint">Sign in with a rider profile to add highlights.</p>`}</div>
+   <div class="row"><span class="spacer"></span><button class="btn" data-act="close">Close</button><button class="btn primary" data-act="plan-route" data-id="${rt.id}">Plan a group ride</button></div></div>`)}
+function hlList(id){const hs=S.highlights.filter(h=>h.routeId===id).sort((a,b)=>(b.votes||[]).length-(a.votes||[]).length||(b.at||0)-(a.at||0));
+  if(!hs.length)return `<p class="hint">No highlights yet. Add the fuel stops, chai dhabas, mechanics and hazards you know on this road.</p>`;
+  return `<div class="hls">${hs.map(h=>{const t=HL_TYPES.find(x=>x[0]===h.type)||HL_TYPES[2];const v=(h.votes||[]);const mine=S.uid&&v.includes(S.uid);const can=S.uid&&(h.by===S.uid||S.canEdit);
+    return `<div class="hl hl-${esc(t[0])}"><span class="hl-t">${esc(t[1])}</span><div style="min-width:0;flex:1"><b>${esc(h.title)}</b>${h.note?`<p>${esc(h.note)}</p>`:""}<small class="hint">by ${esc(allRiders()[h.by]?.name||"a rider")}</small></div>
+     <div class="hl-a"><button class="vote" data-act="vote" data-id="${esc(h._id)}" aria-pressed="${!!mine}"${S.uid&&S.live?"":" disabled"} aria-label="Recommend">▲ ${v.length}</button>${can?`<button class="btn ghost danger" style="padding:2px 8px;font-size:12px" data-act="hl-del" data-id="${esc(h._id)}">Delete</button>`:""}</div></div>`}).join("")}</div>`}
+function rideTime(km){const h=km/40;return h<1?Math.round(h*60)+" min":(Math.round(h*2)/2)+" h"}
+function render(){renderStats();renderNotice();$("#hero").hidden=S.tab!=="riders";
+  document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===S.tab));
+  if(S.tab==="riders")renderRiders();else if(S.tab==="routes")renderRoutes();else if(S.tab==="calendar")renderCalendar();else if(S.tab==="rides")renderRides();else renderProfile();}
+function soft(){ // live data arrived: refresh everything except an open profile form
+  renderStats();renderNotice();if(S.tab!=="profile")render();}
+
+/* ---------- events ---------- */
+document.addEventListener("click",async e=>{
+  const t=e.target.closest("[data-act],[data-tab]");if(!t)return;
+  const a=t.dataset.act||"tab";const id=t.dataset.id;
+  if(a==="tab"){if(dlg.open)dlg.close();S.tab=t.dataset.tab;S.editId=null;S.editVerify=null;if(S.tab==="profile"){S.draft=null;S.vdraft=null}render();window.scrollTo({top:0});return}
+  if(a==="route"){routeDetail(id);return}
+  if(a==="rdiff"){S.rdiff=t.dataset.v;renderRoutes();return}
+  if(a==="rdays"){S.rdays=t.dataset.v;renderRoutes();return}
+  if(a==="plan-route"){planRide("",null,id);return}
+  if(a==="vote"){const h=S.highlights.find(x=>x._id===id);if(!h||!S.uid)return;const v=new Set(h.votes||[]);v.has(S.uid)?v.delete(S.uid):v.add(S.uid);
+    try{await S.db.doc("highlights/"+id).update({votes:[...v]})}catch(err){toast("Couldn't save your vote")}return}
+  if(a==="hl-del"){if(t.dataset.confirm!=="1"){t.dataset.confirm="1";t.textContent="Sure?";return}
+    try{await S.db.doc("highlights/"+id).delete();toast("Highlight deleted")}catch(err){toast("Couldn't delete it")}return}
+  if(a==="add-rider"||a==="edit-rider"){if(dlg.open)dlg.close();
+    S.editId=a==="add-rider"?"added-"+Date.now().toString(36)+Math.random().toString(36).slice(2,7):id;S.editVerify=null;
+    if(a==="edit-rider"){try{const v=await S.db.doc("verify/"+id).get();S.editVerify=v.exists?v.data():null}catch{}}
+    S.draft=null;S.vdraft=null;S.tab="profile";render();window.scrollTo({top:0});return}
+  if(a==="cancel-edit"){S.editId=null;S.editVerify=null;S.draft=null;S.vdraft=null;S.tab="riders";render();window.scrollTo({top:0});return}
+  if(a==="remove-rider"){
+    if(t.dataset.confirm!=="1"){t.dataset.confirm="1";t.textContent="Tap again to remove";setTimeout(()=>{if(t.isConnected){t.dataset.confirm="";t.textContent="Remove rider"}},4000);return}
+    try{await S.db.doc("riders/"+id).delete();await S.db.doc("verify/"+id).delete();if(S.verified[id])await S.db.doc("verified/"+id).delete();dlg.close();toast("Rider removed")}
+    catch(err){toast("Couldn't remove the rider. "+(err?.message||""))}return}
+  if(a==="demo-on"){S.demo=true;render()}
+  if(a==="demo-off"){S.demo=false;render()}
+  if(a==="clear"){S.q="";S.type="";S.gender="";S.date="";S.shared=false;render()}
+  if(a==="verify"||a==="unverify"){
+    try{if(a==="verify")await S.db.doc("verified/"+id).set({at:Date.now(),by:S.uid});else await S.db.doc("verified/"+id).delete();
+      toast(a==="verify"?"Rider marked verified":"Verification removed");viewRider(id)}catch(err){toast("Couldn't change verification. "+(err?.message||""))}}
+  if(a==="view")viewRider(id);
+  if(a==="invite")planRide("",id);
+  if(a==="plan")planRide(t.dataset.d||"");
+  if(a==="close")dlg.close();
+  if(a==="close-profile"){dlg.close();S.tab="profile";S.draft=null;S.vdraft=null;render()}
+  if(a==="copy"){const txt=$("#ph").textContent;try{await navigator.clipboard.writeText(txt);toast("Number copied")}catch{const r=document.createRange();r.selectNodeContents($("#ph"));const s=getSelection();s.removeAllRanges();s.addRange(r);toast("Number selected, copy it")}}
+  if(a==="day"){S.selDate=t.dataset.d;const d=parse(S.selDate);S.calMonth=new Date(d.getFullYear(),d.getMonth(),1);if(S.tab!=="calendar")S.tab="calendar";render()}
+  if(a==="cal"){S.calMonth=new Date(S.calMonth.getFullYear(),S.calMonth.getMonth()+Number(t.dataset.dir),1);renderCalendar()}
+  if(a==="pcal"){readForm();const n=new Date(S.pMonth.getFullYear(),S.pMonth.getMonth()+Number(t.dataset.dir),1);const cur=new Date();if(n>=new Date(cur.getFullYear(),cur.getMonth(),1))S.pMonth=n;renderPCal()}
+  if(a==="pday"){const d=t.dataset.d;const ds_=S.draft.dates;const i=ds_.indexOf(d);i>=0?ds_.splice(i,1):ds_.push(d);renderPCal()}
+  if(a==="weekends"){const now=new Date();for(let i=0;i<56;i++){const d=new Date(now);d.setDate(d.getDate()+i);if(d.getDay()===0||d.getDay()===6){const k=ds(d);if(!S.draft.dates.includes(k))S.draft.dates.push(k)}}renderPCal()}
+  if(a==="rm-photo"){readForm();S.draft.photo="";renderProfile()}
+  if(a==="clear-dates"){S.draft.dates=[];renderPCal()}
+  if(a==="style"||a==="dest"){const arr=a==="style"?S.draft.styles:S.draft.dest;const v=t.dataset.v;const i=arr.indexOf(v);i>=0?arr.splice(i,1):arr.push(v);t.setAttribute("aria-pressed",i<0)}
+  if(a==="join"||a==="leave"){
+    if(!me()){planRide();return}
+    const r=S.rides.find(x=>x._id===id);if(!r)return;let list=[...(r.riders||[])];
+    list=a==="join"?[...new Set([...list,S.uid])]:list.filter(x=>x!==S.uid);
+    try{await S.db.doc("rides/"+id).update({riders:list});toast(a==="join"?"You're on this ride":"You left the ride")}catch(err){toast("Couldn't update the ride. "+(err?.message||""))}}
+  if(a==="cancel"){
+    if(t.dataset.confirm!=="1"){t.dataset.confirm="1";t.textContent="Tap again to cancel";setTimeout(()=>{if(t.isConnected){t.dataset.confirm="";t.textContent="Cancel ride"}},4000);return}
+    try{await S.db.doc("rides/"+id).delete();toast("Ride cancelled")}catch(err){toast("Couldn't cancel the ride")}}
+});
+document.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.matches('label[for="p-photo"]')){e.preventDefault();$("#p-photo").click()}});
+dlg.addEventListener("click",e=>{if(e.target===dlg)dlg.close()});
+dlg.addEventListener("close",()=>{S.openRoute=null});
+document.addEventListener("input",e=>{
+  const id=e.target.id;
+  if(id==="v-cnic"){const dg=e.target.value.replace(/\D/g,"").slice(0,13);e.target.value=dg.length>12?dg.slice(0,5)+"-"+dg.slice(5,12)+"-"+dg.slice(12):dg.length>5?dg.slice(0,5)+"-"+dg.slice(5):dg}
+  if(id==="fq"){S.q=e.target.value;const pos=e.target.selectionStart;renderRiders();const f=$("#fq");f.focus();f.setSelectionRange(pos,pos)}
+});
+document.addEventListener("change",e=>{
+  const id=e.target.id;
+  if(id==="p-photo"){const f=e.target.files&&e.target.files[0];if(!f)return;readForm();
+    resizePhoto(f).then(p=>{S.draft.photo=p;renderProfile();toast("Photo added. Save your profile to publish it.")}).catch(err=>toast(err.message));}
+  if(id==="ft"){S.type=e.target.value;renderRiders()}
+  if(id==="fg"){S.gender=e.target.value;renderRiders()}
+  if(id==="fd"){S.date=e.target.value;renderRiders()}
+  if(id==="fs"){S.shared=e.target.checked;renderRiders()}
+});
+document.addEventListener("submit",async e=>{
+  e.preventDefault();
+  if(e.target.id==="pf"){
+    readForm();const d=S.draft;
+    const bad=checkLegal();if(bad){toast(bad[1]);const el=$("#"+bad[0]);el.focus();el.scrollIntoView({block:"center"});return}
+    if(!S.db||!S.uid){toast("Sign in on claude.ai to publish your profile");return}
+    const x=S.vdraft;
+    if(S.editId){
+      const rid=S.editId;const prev=S.riders[rid];
+      const mdoc={name:d.name,photo:okPhoto(d.photo)?d.photo:"",gender:d.gender,level:d.level||"Easy",area:d.area,phone:d.phone,years:Number(d.years)||0,styles:d.styles,bio:d.bio,dest:d.dest,
+        bike:{make:d.bike.make,model:d.bike.model,cc:Number(d.bike.cc)||0,type:d.bike.type},dates:future([...new Set(d.dates)]),
+        docs:{cnic:CNIC_RE.test(x.cnic),licence:!!x.licNo&&!!x.licExp&&x.licCat!=="Learner permit"&&!!x.licCat,reg:!!x.regNo,helmet:x.helmet,insured:x.insured,papers:x.papers},
+        managed:true,addedBy:prev?.addedBy||S.uid,updatedAt:Date.now()};
+      const b=$("#savebtn");b.disabled=true;b.textContent="Saving…";
+      try{await S.db.doc("riders/"+rid).set(mdoc);await S.db.doc("verify/"+rid).set({...x,agree:false,updatedAt:Date.now()});
+        S.riders[rid]=mdoc;toast(prev?"Rider updated":d.name+" is now listed");S.editId=null;S.editVerify=null;S.draft=null;S.vdraft=null;S.tab="riders";render();window.scrollTo({top:0})}
+      catch(err){b.disabled=false;b.textContent="Save rider";toast("Couldn't save the rider. "+(err?.message||"Only admins can list riders."))}
+      return}
+    const doc={name:d.name,photo:okPhoto(d.photo)?d.photo:"",gender:d.gender,level:d.level||"Easy",area:d.area,phone:d.phone,years:Number(d.years)||0,styles:d.styles,bio:d.bio,dest:d.dest,
+      bike:{make:d.bike.make,model:d.bike.model,cc:Number(d.bike.cc)||0,type:d.bike.type},dates:future([...new Set(d.dates)]),
+      docs:{cnic:true,licence:x.licCat!=="Learner permit",reg:true,helmet:x.helmet,insured:x.insured,papers:x.papers},updatedAt:Date.now()};
+    const priv={...x,updatedAt:Date.now()};
+    const b=$("#savebtn");b.disabled=true;b.textContent="Saving…";
+    try{await S.db.doc("verify/"+S.uid).set(priv);S.myVerify=priv;
+      await S.db.doc("riders/"+S.uid).set(doc);S.riders[S.uid]=doc;S.draft=null;S.vdraft=null;toast("Profile saved. Riders can see you now.");S.tab="riders";render()}
+    catch(err){b.disabled=false;b.textContent="Save changes";if(err?.code==="invalid_argument"){S.readOnly=true;renderNotice()}toast("Couldn't save. "+(err?.message||"Try again."))}
+  }
+  if(e.target.id==="hlf"){
+    const title=$("#h-title").value.trim(),note=$("#h-note").value.trim(),type=$("#h-type").value;
+    if(!title){toast("Name the place for this highlight");$("#h-title").focus();return}
+    try{await S.db.collection("highlights").add({routeId:S.openRoute,type,title,note,by:S.uid,at:Date.now(),votes:[S.uid]});e.target.reset();toast("Highlight added. Thanks for helping other riders.")}
+    catch(err){toast(err?.code==="quota_exceeded"?"The highlights board is full.":"Couldn't add the highlight. "+(err?.message||""))}
+    return}
+  if(e.target.id==="rf"){
+    const v=id=>$("#"+id).value.trim();const date=v("r-date");if(!date||date<TODAY){toast("Pick a date from today on");return}
+    const sel=v("r-dest");const rt=sel.startsWith("route:")?routeById(sel.slice(6)):null;const dest=rt?rt.to:sel;const inv=e.submitter?.dataset.invite;
+    const ride={title:v("r-title")||(rt?rt.name:"Ride to "+dest),dest,routeId:rt?rt.id:"",date,time:v("r-time"),meet:v("r-meet"),notes:v("r-notes"),organizer:S.uid,riders:[S.uid],invited:inv?[inv]:[],createdAt:Date.now()};
+    try{await S.db.collection("rides").add(ride);dlg.close();S.tab="rides";render();toast(inv?"Ride posted. Share the date with "+(allRiders()[inv]?.name||"them")+" on WhatsApp.":"Ride posted")}
+    catch(err){toast(err?.code==="quota_exceeded"?"The ride board is full. Cancel old rides first.":"Couldn't post the ride. "+(err?.message||""))}
+  }
+});
+
+/* ---------- live data ---------- */
+render();
+(async()=>{
+  const use=window.claude&&window.claude.use;
+  if(!use){S.loading=false;S.standalone=true;S.demo=true;render();return}
+  const [db,user]=await Promise.all([window.claude.use("db"),window.claude.use("user")]);
+  if(!db){S.loading=false;S.error="Sign in to see and share rider profiles.";render();return}
+  S.db=db;S.live=true;
+  S.uid=user?await user.id():null;
+  if(!S.uid)S.readOnly=true;
+  if(user){const c=await user.can("data.write");if(c===false)S.readOnly=true;S.canEdit=await user.canEdit()}
+  if(S.uid){try{const v=await db.doc("verify/"+S.uid).get();S.myVerify=v.exists?v.data():null;if(S.tab==="profile"&&!me()){S.vdraft=null;renderProfile()}}catch{}}
+  db.collection("highlights").onSnapshot(snap=>{S.highlights=snap.docs.map(d=>({...d.data(),_id:d.id}));
+    if(dlg.open&&S.openRoute&&$("#hl-list"))$("#hl-list").innerHTML=hlList(S.openRoute);if(S.tab==="routes")renderRoutes()},()=>{});
+  db.collection("verified").onSnapshot(snap=>{const o={};snap.docs.forEach(d=>o[d.id]=d.data());S.verified=o;soft()},()=>{});
+  const timer=setTimeout(()=>{if(S.loading){S.loading=false;S.error="The rider board can't be reached yet.";S.live=false;soft()}},10000);
+  let gotR=false,gotRides=false;
+  const done=()=>{if(gotR&&gotRides){clearTimeout(timer);if(S.loading){S.loading=false;S.error="";S.live=true}}};
+  db.collection("riders").onSnapshot(snap=>{const o={};snap.docs.forEach(d=>o[d.id]=d.data());S.riders=o;if(!snap.metadata.fromCache){gotR=true;done()}soft()},
+    err=>{clearTimeout(timer);S.loading=false;S.live=false;S.error="Couldn't load riders.";soft()});
+  db.collection("rides").onSnapshot(snap=>{S.rides=snap.docs.map(d=>({...d.data(),_id:d.id}));if(!snap.metadata.fromCache){gotRides=true;done()}soft()},
+    err=>{S.rides=[];gotRides=true;done();soft()});
+  render();
+})();
+</script>
+
+</body>
+</html>
